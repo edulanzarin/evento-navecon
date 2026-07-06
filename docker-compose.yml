@@ -1,0 +1,13 @@
+services:
+  web:
+    build:
+      context: .
+      args:
+        # Set the registration endpoint at build time if you have one;
+        # leave empty to use the built-in placeholder submitter.
+        VITE_REGISTRATION_ENDPOINT: ${VITE_REGISTRATION_ENDPOINT:-}
+    image: navecon-landing
+    container_name: navecon-landing
+    ports:
+      - "8080:80"
+    restart: unless-stopped
