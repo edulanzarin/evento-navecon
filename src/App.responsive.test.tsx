@@ -126,20 +126,22 @@ describe("Responsive / layout checks (Req 1.8, 2.1–2.4, 3.10)", () => {
     }
   );
 
-  it("uses the .grid-multi class on the multi-item Speakers section that drives the 768px column breakpoint (Req 2.1, 2.2)", () => {
-    // Speakers always has two entries, so its grid container is always present.
-    // jsdom cannot compute the resolved column count from the @media rule, so
-    // we assert the class CONTRACT instead: `.grid-multi` is single-column by
-    // default and `repeat(2, 1fr)` above 769px per index.css.
+  it("renders the Speakers section as two .speaker-feature blocks that drive the 860px media/text breakpoint (Req 2.1, 2.2)", () => {
+    // Speakers always has two entries, rendered as stacked full-width feature
+    // blocks. jsdom cannot compute the resolved grid from the @media rule, so
+    // we assert the class CONTRACT instead: `.speaker-feature` is single-column
+    // by default and photo-beside-text above 860px per index.css (the second
+    // block carries the --flip modifier that mirrors the columns).
     const { container } = render(<App />);
 
     const speakers = container.querySelector("#speakers");
     expect(speakers).not.toBeNull();
 
-    const grid = speakers!.querySelector(".grid-multi");
-    expect(grid).not.toBeNull();
-    // The grid holds exactly the two speaker entries (the multi-column items).
-    expect(grid!.children.length).toBe(2);
+    const flow = speakers!.querySelector(".speakers-flow");
+    expect(flow).not.toBeNull();
+    const features = flow!.querySelectorAll(".speaker-feature");
+    expect(features.length).toBe(2);
+    expect(features[1].classList.contains("speaker-feature--flip")).toBe(true);
   });
 
   it("renders populated Themes and Audience lists in a .grid-multi container (Req 2.2)", () => {

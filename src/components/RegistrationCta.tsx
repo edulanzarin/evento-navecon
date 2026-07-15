@@ -27,7 +27,7 @@ import { scrollToForm } from "../logic/scrollToForm";
  * Sharing one constant guarantees identical wording across all CTA instances
  * (Req 9.3).
  */
-export const CTA_LABEL = "Quero me inscrever";
+export const CTA_LABEL = "Quero garantir minha vaga";
 
 export interface RegistrationCtaProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> {

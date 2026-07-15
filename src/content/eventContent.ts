@@ -13,75 +13,124 @@ import type { EventContent } from "./types";
 
 export const eventContent: EventContent = {
   // Fixed, known-now content
-  eventName: "Imersão Presencial com Mailson Junior e Fabio Edelberg",
-  speakerNames: ["Fabio Edelberg", "Mailson Junior"],
+  eventName:
+    "Transforme sua empresa física em uma operação de vendas escalável nos " +
+    "maiores marketplaces do Brasil",
+  speakerNames: ["Fábio Edelberg", "Mailson Junior"],
   dateLabel: "16 e 17 de setembro de 2026",
   venueLabel: "Navecon Contabilidade – Unidade Brusque",
   fullAddress:
     "Av. 1º de Maio, 38 – Sala 12 – Centro 2, Brusque – SC, CEP 88353202",
 
   // Pending-capable content (null/empty → pending state)
-  // Filler/placeholder content (lorem ipsum) to preview the finalized layout.
-  eventTime: "08:00 às 18:00",
+  eventTime: null,
   aboutDetail:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod " +
-    "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim " +
-    "veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea " +
-    "commodo consequat. Duis aute irure dolor in reprehenderit in voluptate.",
+    "A maioria dos treinamentos ensina apenas como vender mais. Nesta " +
+    "imersão, você vai aprender a vender mais, organizar sua operação e " +
+    "preparar sua empresa para crescer com segurança — unindo duas " +
+    "competências fundamentais: a estratégia comercial, os marketplaces, a " +
+    "gestão e a escala com Mailson Junior, e a inteligência tributária, o " +
+    "planejamento fiscal e a estrutura empresarial com Fábio Edelberg. Essa " +
+    "integração proporciona uma visão completa do negócio, permitindo que o " +
+    "crescimento das vendas aconteça com organização, rentabilidade e " +
+    "sustentabilidade.",
   themes: [
-    "Lorem ipsum dolor sit amet",
-    "Consectetur adipiscing elit",
-    "Sed do eiusmod tempor incididunt",
-    "Ut labore et dolore magna aliqua",
-    "Quis nostrud exercitation ullamco",
-    "Ullamco laboris nisi ut aliquip",
-    "Duis aute irure dolor reprehenderit",
-    "Excepteur sint occaecat cupidatat",
+    "Estruturação da operação em marketplaces",
+    "Gestão empresarial aplicada ao crescimento",
+    "Formação e gestão de equipes",
+    "Criação e otimização de anúncios",
+    "Estratégias de Marketplace Ads",
+    "Escalabilidade da operação",
+    "Inteligência tributária aplicada ao e-commerce",
+    "Reforma Tributária e seus impactos",
+    "Planejamento tributário para aumentar a lucratividade",
+    "Como crescer pagando o imposto correto",
   ],
   audience: [
-    "Lorem ipsum: empresários e fundadores",
-    "Consectetur: gestores e diretores financeiros",
-    "Sed do eiusmod: contadores e consultores",
-    "Ut enim ad minim: sócios em crescimento",
+    "Empresários que querem transformar a operação física em um negócio de vendas online escalável",
+    "Distribuidores, fabricantes e importadores que desejam expandir para os principais marketplaces do Brasil",
+    "Lojistas que já vendem online, mas buscam organizar processos e aumentar a lucratividade",
+    "Empresas que querem estruturar equipes e escalar as vendas aliando crescimento comercial à inteligência tributária",
   ],
   speakers: [
     {
-      name: "Fabio Edelberg",
-      role: "CEO da Navecon Contabilidade",
-      bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      name: "Fábio Edelberg",
+      role: "CEO da Navecon Contabilidade & Assessoria",
+      bio:
+        "Atua há mais de 13 anos auxiliando empresas a reduzirem custos " +
+        "tributários de forma legal, aumentarem sua lucratividade e se " +
+        "prepararem para os impactos da Reforma Tributária. À frente da " +
+        "Navecon, já participou da transformação estratégica de mais de " +
+        "1.350 empresas, desenvolvendo planejamentos tributários, " +
+        "reorganizações societárias e estratégias de crescimento. Na " +
+        "imersão, apresenta como estruturar a empresa para crescer nos " +
+        "marketplaces sem comprometer a margem de lucro.",
       photoSrc: "/assets/gallery/fabio.jpg",
     },
     {
       name: "Mailson Junior",
-      role: "Fundador do Império Moda Atacadista",
-      bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
+      role: "Especialista em crescimento de empresas através dos marketplaces",
+      bio:
+        "Empresário, mentor e referência nacional na construção de operações " +
+        "escaláveis para vendas em marketplaces, com mais de 17 anos de " +
+        "experiência no setor da moda. Fundador da Império Moda Atacadista, " +
+        "do Seu Império Online e do Grupo Império, é o criador do Método " +
+        "S.I.O., metodologia desenvolvida para estruturar, organizar e " +
+        "escalar empresas no ambiente digital. Gerencia mais de R$ 2 milhões " +
+        "em faturamento mensal através de marketplaces e já mentorou mais de " +
+        "300 empresários, fabricantes e indústrias em todo o Brasil.",
       photoSrc: "/assets/gallery/mailson.jpeg",
     },
   ],
   faq: [
     {
-      question: "Lorem ipsum dolor sit amet?",
+      question: "Para quem é esta imersão?",
       answer:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do " +
-        "eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "Para empresários, distribuidores, fabricantes, importadores e " +
+        "lojistas que desejam expandir suas operações para os principais " +
+        "marketplaces do Brasil. Também é ideal para empresas que já vendem " +
+        "online, mas buscam organizar processos, aumentar a lucratividade, " +
+        "estruturar equipes e escalar suas vendas de forma sustentável, " +
+        "aliando crescimento comercial à inteligência tributária.",
     },
     {
-      question: "Consectetur adipiscing elit, sed do eiusmod?",
+      question: "O evento é presencial?",
       answer:
-        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris " +
-        "nisi ut aliquip ex ea commodo consequat.",
+        "Sim. A imersão será realizada 100% presencialmente na Navecon " +
+        "Contabilidade, em Brusque/SC. Além do conteúdo prático, o evento " +
+        "foi pensado para proporcionar networking, troca de experiências e " +
+        "interação direta com os especialistas.",
     },
     {
-      question: "Sed do eiusmod tempor incididunt ut labore?",
+      question: "O que está incluso na inscrição?",
       answer:
-        "Duis aute irure dolor in reprehenderit in voluptate velit esse " +
-        "cillum dolore eu fugiat nulla pariatur.",
+        "Sua inscrição garante participação nos 2 dias de imersão " +
+        "presencial, material de apoio exclusivo, coffee break durante o " +
+        "evento, networking com empresários de diferentes segmentos e " +
+        "conteúdo prático ministrado por Mailson Junior e Fábio Edelberg.",
     },
     {
-      question: "Quis nostrud exercitation ullamco laboris?",
+      question: "Preciso já vender em marketplaces?",
       answer:
-        "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui " +
-        "officia deserunt mollit anim id est laborum.",
+        "Não. A imersão atende tanto empresários que desejam iniciar sua " +
+        "operação quanto empresas que já vendem online e querem estruturar " +
+        "processos, aumentar performance e crescer com mais segurança.",
+    },
+    {
+      question: "Como faço minha inscrição?",
+      answer:
+        "Basta clicar no botão \"Quero garantir minha vaga\" ou entrar em " +
+        "contato pelo WhatsApp oficial do evento. Nossa equipe apresentará " +
+        "as formas de pagamento disponíveis, à vista e parceladas, e após a " +
+        "confirmação do pagamento sua vaga será reservada.",
+    },
+    {
+      question: "As vagas são limitadas?",
+      answer:
+        "Sim. Para garantir uma experiência de alto nível e maior interação " +
+        "entre participantes e especialistas, as vagas são limitadas. " +
+        "Recomendamos realizar sua inscrição com antecedência para garantir " +
+        "sua participação.",
     },
   ],
   contacts: [

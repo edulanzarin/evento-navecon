@@ -88,8 +88,9 @@ export function HeroSection({
           </p>
 
           <p className="hero__lead">
-            Dois dias de mergulho prático para estruturar a operação contábil e
-            tributária do seu negócio, com networking entre empresários.
+            Dois dias de imersão prática com estratégias de operação, gestão,
+            vendas e inteligência tributária para empresários que querem
+            crescer com segurança e lucratividade.
           </p>
 
           <p className="hero__proof">Vagas limitadas · turma fechada</p>

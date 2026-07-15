@@ -48,7 +48,9 @@ export function AboutSection({ aboutDetail, sideVideo }: AboutSectionProps) {
 
       {/* Exactly one of finalized detail or pending placeholder (Req 5.3–5.5). */}
       {detail.status === "finalized" ? (
-        <p data-testid="about-detail">{detail.value}</p>
+        <p className="body-copy" data-testid="about-detail">
+          {detail.value}
+        </p>
       ) : (
         <p className="pending" data-testid="about-pending" role="status">
           {detail.message}

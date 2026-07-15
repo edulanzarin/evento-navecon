@@ -21,6 +21,7 @@ import { getActivePalette } from "./theme/theme";
 import { applyPalette } from "./theme/applyPalette";
 import { SafeImage } from "./components/SafeImage";
 import { HeroSection } from "./components/HeroSection";
+import { PainPointsSection } from "./components/PainPointsSection";
 import { AboutSection } from "./components/AboutSection";
 import { SpeakersSection } from "./components/SpeakersSection";
 import { ThemesSection } from "./components/ThemesSection";
@@ -132,6 +133,10 @@ export function App() {
             </div>
           </div>
         </section>
+
+        {/* "Você sente que..." — qualification band (no id → excluded from
+            the ordered section list, like the stats band). */}
+        <PainPointsSection />
 
         <AboutSection
           aboutDetail={eventContent.aboutDetail}

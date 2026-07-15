@@ -74,11 +74,13 @@ describe("SpeakersSection (Req 6.1, 6.6)", () => {
     const entries = screen.getAllByRole("article");
 
     const fabio = entries.find((el) =>
-      within(el).queryByText("Fabio Edelberg")
+      within(el).queryByText("Fábio Edelberg")
     );
     expect(fabio).toBeDefined();
     expect(
-      within(fabio as HTMLElement).getByText("CEO da Navecon Contabilidade")
+      within(fabio as HTMLElement).getByText(
+        "CEO da Navecon Contabilidade & Assessoria"
+      )
     ).toBeInTheDocument();
 
     const mailson = entries.find((el) =>
@@ -87,7 +89,7 @@ describe("SpeakersSection (Req 6.1, 6.6)", () => {
     expect(mailson).toBeDefined();
     expect(
       within(mailson as HTMLElement).getByText(
-        "Fundador do Império Moda Atacadista"
+        "Especialista em crescimento de empresas através dos marketplaces"
       )
     ).toBeInTheDocument();
   });

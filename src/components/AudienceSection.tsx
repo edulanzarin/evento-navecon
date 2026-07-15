@@ -39,7 +39,8 @@ export function AudienceSection({ audience }: AudienceSectionProps) {
           Para quem é
         </h2>
         <p className="lead">
-          Feito para quem decide e precisa de clareza contábil e tributária.
+          Feito para quem decide e quer crescer nos marketplaces com segurança
+          e lucratividade.
         </p>
       </div>
 

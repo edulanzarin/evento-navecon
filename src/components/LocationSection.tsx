@@ -15,6 +15,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { StyleSpecification } from "maplibre-gl";
 import { eventContent } from "../content/eventContent";
+import { PENDING_MESSAGES, resolveText } from "../content/resolvers";
 
 export interface LocationSectionProps {
   /** Full venue address. Defaults to the configured event address. */
@@ -146,6 +147,10 @@ export function LocationSection({
   const [mapFailed, setMapFailed] = useState(false);
   const externalUrl = buildExternalUrl(address);
 
+  // Same source/pending message as the hero card, so both stay in sync.
+  const time = resolveText(eventContent.eventTime, PENDING_MESSAGES.eventTime);
+  const timeText = time.status === "finalized" ? time.value : time.message;
+
   useEffect(() => {
     let cancelled = false;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -220,7 +225,7 @@ export function LocationSection({
             </div>
             <div>
               <p className="detail-label">Horário</p>
-              <p className="detail-value">08:00 às 18:00</p>
+              <p className="detail-value">{timeText}</p>
             </div>
             <div>
               <p className="detail-label">Formato</p>

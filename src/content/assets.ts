@@ -37,19 +37,29 @@ export interface AssetMap {
   };
 }
 
+/**
+ * Prefixes a public-root-absolute path (`/assets/...`) with Vite's configured
+ * base. A no-op under the default `/` base (dev, tests, root deploys); under a
+ * subpath base (e.g. GitHub Pages' `/evento-navecon/`) it rebases the URL so
+ * runtime string paths resolve like statically imported assets do.
+ */
+export function withBase(path: string): string {
+  return import.meta.env.BASE_URL.replace(/\/$/, "") + path;
+}
+
 export const ASSETS: AssetMap = {
   logo: {
-    light: "/assets/logo/icon-light.png",
-    dark: "/assets/logo/icon-dark.png",
+    light: withBase("/assets/logo/icon-light.png"),
+    dark: withBase("/assets/logo/icon-dark.png"),
   },
   video: {
-    background: "/assets/video/background.mp4",
-    imersao: "/assets/video/imersao.mp4",
-    evento: "/assets/video/evento.mp4",
-    navecon: "/assets/video/navecon.mp4",
+    background: withBase("/assets/video/background.mp4"),
+    imersao: withBase("/assets/video/imersao.mp4"),
+    evento: withBase("/assets/video/evento.mp4"),
+    navecon: withBase("/assets/video/navecon.mp4"),
   },
   gallery: {
-    ambient1: "/assets/gallery/ambient-1.jpeg",
-    ambient2: "/assets/gallery/ambient-2.jpeg",
+    ambient1: withBase("/assets/gallery/ambient-1.jpeg"),
+    ambient2: withBase("/assets/gallery/ambient-2.jpeg"),
   },
 } as const;
