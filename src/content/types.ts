@@ -21,8 +21,15 @@ export type Resolved<T> =
 export interface SpeakerContent {
   name: string;
   role: string;
-  /** Short one/two-line bio (optional). */
+  /**
+   * Bio copy (optional). "\n\n" separates paragraphs; when a paragraph starts
+   * with the speaker's name, the name renders in bold.
+   */
   bio?: string;
+  /** Key metric chips shown under the role (e.g. "+17 anos de experiência"). */
+  highlights?: string[];
+  /** "Na imersão" callout copy, rendered in an accented box after the bio. */
+  immersion?: string;
   /** Relative asset path, or `null` to render a placeholder image. */
   photoSrc: string | null;
 }

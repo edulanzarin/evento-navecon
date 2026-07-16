@@ -55,28 +55,45 @@ export const eventContent: EventContent = {
       name: "Fábio Edelberg",
       role: "CEO da Navecon Contabilidade & Assessoria",
       bio:
-        "Atua há mais de 13 anos auxiliando empresas a reduzirem custos " +
-        "tributários de forma legal, aumentarem sua lucratividade e se " +
-        "prepararem para os impactos da Reforma Tributária. À frente da " +
-        "Navecon, já participou da transformação estratégica de mais de " +
-        "1.350 empresas, desenvolvendo planejamentos tributários, " +
-        "reorganizações societárias e estratégias de crescimento. Na " +
-        "imersão, apresenta como estruturar a empresa para crescer nos " +
-        "marketplaces sem comprometer a margem de lucro.",
+        "Fábio Edelberg atua há mais de 13 anos auxiliando empresas a " +
+        "reduzirem custos tributários de forma legal, aumentarem sua " +
+        "lucratividade e se prepararem para os impactos da Reforma " +
+        "Tributária.\n\nÀ frente da Navecon, já participou da transformação " +
+        "estratégica de mais de 1.350 empresas, desenvolvendo planejamentos " +
+        "tributários, reorganizações societárias e estratégias de " +
+        "crescimento.",
+      highlights: [
+        "+13 anos de experiência",
+        "+1.350 empresas transformadas",
+      ],
+      immersion:
+        "Apresenta como estruturar a empresa para crescer nos marketplaces " +
+        "sem comprometer a margem de lucro.",
       photoSrc: "/assets/gallery/fabio.jpg",
     },
     {
       name: "Mailson Junior",
       role: "Especialista em crescimento de empresas através dos marketplaces",
       bio:
-        "Empresário, mentor e referência nacional na construção de operações " +
-        "escaláveis para vendas em marketplaces, com mais de 17 anos de " +
-        "experiência no setor da moda. Fundador da Império Moda Atacadista, " +
-        "do Seu Império Online e do Grupo Império, é o criador do Método " +
-        "S.I.O., metodologia desenvolvida para estruturar, organizar e " +
-        "escalar empresas no ambiente digital. Gerencia mais de R$ 2 milhões " +
-        "em faturamento mensal através de marketplaces e já mentorou mais de " +
-        "300 empresários, fabricantes e indústrias em todo o Brasil.",
+        "Mailson Junior é empresário, mentor e referência nacional na " +
+        "construção de operações escaláveis para vendas em marketplaces. Com " +
+        "mais de 17 anos de experiência no setor da moda, é fundador da " +
+        "Império Moda Atacadista, do Seu Império Online e do Grupo Império, " +
+        "além de criador do Método S.I.O, metodologia desenvolvida para " +
+        "estruturar, organizar e escalar empresas no ambiente " +
+        "digital.\n\nAtualmente, gerencia mais de R$ 2 milhões em faturamento " +
+        "mensal por meio dos marketplaces e já mentorou mais de 300 " +
+        "empresários, fabricantes e indústrias em todo o Brasil.",
+      highlights: [
+        "+17 anos de experiência",
+        "R$ 2 mi+ por mês em marketplaces",
+        "+300 empresários mentorados",
+      ],
+      immersion:
+        "Compartilha sua experiência prática mostrando como estruturar um " +
+        "negócio para crescer nos marketplaces com segurança, eficiência " +
+        "tributária e maior rentabilidade, preservando a margem de lucro e " +
+        "preparando a empresa para uma operação escalável.",
       photoSrc: "/assets/gallery/mailson.jpeg",
     },
   ],

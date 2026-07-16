@@ -118,7 +118,34 @@ export function SpeakersSection({ speakers }: SpeakersSectionProps) {
             <div className="speaker-feature__body">
               <p className="speaker-name">{speaker.name}</p>
               <p className="speaker-role">{speaker.role}</p>
-              {speaker.bio && <p className="speaker-bio">{speaker.bio}</p>}
+
+              {speaker.highlights && speaker.highlights.length > 0 && (
+                <ul className="speaker-highlights">
+                  {speaker.highlights.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              )}
+
+              {speaker.bio?.split("\n\n").map((paragraph) => (
+                <p key={paragraph.slice(0, 32)} className="speaker-bio">
+                  {paragraph.startsWith(speaker.name) ? (
+                    <>
+                      <strong>{speaker.name}</strong>
+                      {paragraph.slice(speaker.name.length)}
+                    </>
+                  ) : (
+                    paragraph
+                  )}
+                </p>
+              ))}
+
+              {speaker.immersion && (
+                <div className="speaker-immersion">
+                  <span className="speaker-immersion__label">Na imersão</span>
+                  <p>{speaker.immersion}</p>
+                </div>
+              )}
             </div>
           </article>
         ))}

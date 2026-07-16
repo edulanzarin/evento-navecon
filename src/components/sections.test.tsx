@@ -76,7 +76,7 @@ describe("SpeakersSection (Req 6.1, 6.6)", () => {
     const entries = screen.getAllByRole("article");
 
     const fabio = entries.find((el) =>
-      within(el).queryByText("Fábio Edelberg")
+      within(el).queryByText("Fábio Edelberg", { selector: ".speaker-name" })
     );
     expect(fabio).toBeDefined();
     expect(
@@ -86,7 +86,7 @@ describe("SpeakersSection (Req 6.1, 6.6)", () => {
     ).toBeInTheDocument();
 
     const mailson = entries.find((el) =>
-      within(el).queryByText("Mailson Junior")
+      within(el).queryByText("Mailson Junior", { selector: ".speaker-name" })
     );
     expect(mailson).toBeDefined();
     expect(

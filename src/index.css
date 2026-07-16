@@ -961,6 +961,68 @@ p {
   hyphens: auto;
 }
 
+.speaker-bio + .speaker-bio {
+  margin-top: 0.65rem;
+}
+
+.speaker-bio strong {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+/* Metric chips under the speaker role. */
+.speaker-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.speaker-highlights li {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(200, 162, 60, 0.45);
+  background: rgba(200, 162, 60, 0.08);
+  color: var(--accent-strong);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* "Na imersão" callout after the bio. */
+.speaker-immersion {
+  margin-top: 1.25rem;
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(200, 162, 60, 0.35);
+  border-left: 3px solid var(--color-accent);
+  background: linear-gradient(
+    90deg,
+    rgba(200, 162, 60, 0.1),
+    rgba(200, 162, 60, 0.02)
+  );
+}
+
+.speaker-immersion__label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 0.4rem;
+}
+
+.speaker-immersion p {
+  color: var(--color-text-primary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 60ch;
+}
+
 /* ── Checklist (pain points) — no boxes, gold check + hairline rows ───── */
 
 .check-list {
