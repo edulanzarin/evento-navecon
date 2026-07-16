@@ -1209,6 +1209,16 @@ p {
   border: 1px solid var(--hairline);
 }
 
+/* Address renders in two lines ("\n" in the content). */
+.location-address {
+  white-space: pre-line;
+}
+
+/* Breathing room between the detail grid and the "Abrir no mapa" button. */
+.location-card > .btn {
+  margin-top: 1.6rem;
+}
+
 .location-map {
   position: relative;
   border-radius: var(--radius);

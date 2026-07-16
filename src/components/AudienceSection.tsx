@@ -34,7 +34,7 @@ export function AudienceSection({ audience }: AudienceSectionProps) {
   return (
     <section id="audience" className="section" aria-labelledby="audience-heading">
       <div className="section-head">
-        <span className="eyebrow">Para quem é</span>
+        <span className="eyebrow">Para quem é indicado</span>
         <h2 id="audience-heading" className="section-title">
           Para quem é
         </h2>

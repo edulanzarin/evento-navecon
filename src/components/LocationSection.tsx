@@ -147,6 +147,9 @@ export function LocationSection({
   const [mapFailed, setMapFailed] = useState(false);
   const externalUrl = buildExternalUrl(address);
 
+  // Display version: break onto two lines before "Centro" (pre-line CSS).
+  const displayAddress = address.replace(" – Centro ", "\nCentro ");
+
   // Same source/pending message as the hero card, so both stay in sync.
   const time = resolveText(eventContent.eventTime, PENDING_MESSAGES.eventTime);
   const timeText = time.status === "finalized" ? time.value : time.message;
@@ -216,12 +219,14 @@ export function LocationSection({
 
       <div className="location-grid">
         <div className="location-card">
-          <p data-testid="location-address">{address}</p>
+          <p className="location-address" data-testid="location-address">
+            {displayAddress}
+          </p>
 
           <div className="detail-grid">
             <div>
               <p className="detail-label">Dias</p>
-              <p className="detail-value">16 e 17 de setembro de 2026</p>
+              <p className="detail-value">16 e 17/09</p>
             </div>
             <div>
               <p className="detail-label">Horário</p>

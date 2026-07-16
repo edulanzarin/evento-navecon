@@ -22,12 +22,16 @@ import { LocationSection } from "./LocationSection";
 const FULL_ADDRESS =
   "Av. 1º de Maio, 38 – Sala 12 – Centro 2, Brusque – SC, CEP 88353202";
 
+/** What the card shows: two lines, without the dash before "Centro". */
+const DISPLAY_ADDRESS =
+  "Av. 1º de Maio, 38 – Sala 12 Centro 2, Brusque – SC, CEP 88353202";
+
 describe("LocationSection", () => {
   it("renders the full venue address text (Req 11.1)", () => {
     render(<LocationSection />);
     const address = screen.getByTestId("location-address");
     expect(address).toBeInTheDocument();
-    expect(address).toHaveTextContent(FULL_ADDRESS);
+    expect(address).toHaveTextContent(DISPLAY_ADDRESS);
   });
 
   it("renders the map container (Req 11.2)", () => {

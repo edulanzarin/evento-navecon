@@ -34,7 +34,7 @@ export function ThemesSection({ themes }: ThemesSectionProps) {
   return (
     <section id="themes" className="section" aria-labelledby="themes-heading">
       <div className="section-head">
-        <span className="eyebrow">O que você vai ver</span>
+        <span className="eyebrow">O que você vai aprender</span>
         <h2 id="themes-heading" className="section-title">
           Temas abordados
         </h2>
