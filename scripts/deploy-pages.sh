@@ -14,7 +14,8 @@ npx vite build --mode ghpages
 touch dist/.nojekyll
 
 # Build a commit containing only dist/ without touching the working tree.
-export GIT_INDEX_FILE="$(mktemp)"
+# (-u: git precisa que o índice temporário ainda não exista como arquivo vazio)
+export GIT_INDEX_FILE="$(mktemp -u)"
 trap 'rm -f "$GIT_INDEX_FILE"' EXIT
 git --work-tree=dist add -A
 TREE=$(git write-tree)
