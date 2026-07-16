@@ -174,6 +174,17 @@ export function App() {
           </div>
         </section>
 
+        {/* Divider banner between Navecon and speakers (same style as the
+            pain-points closing banner). */}
+        <div className="stack-block">
+          <p className="made-for-you">
+            <span>
+              Dois dias que podem mudar{" "}
+              <strong>o rumo do seu negócio.</strong>
+            </span>
+          </p>
+        </div>
+
         <SpeakersSection speakers={eventContent.speakers} />
         <ThemesSection themes={eventContent.themes} />
         <AudienceSection audience={eventContent.audience} />
