@@ -33,8 +33,12 @@ import { RegistrationCta } from "./components/RegistrationCta";
 import { VideoPlayer } from "./components/VideoPlayer";
 import { Footer } from "./components/Footer";
 
-/** Non-empty document title identifying the event (Req 1.5). */
-const DOCUMENT_TITLE = `${eventContent.eventName} | Navecon Contabilidade`;
+/**
+ * Non-empty document title identifying the event (Req 1.5). Concise for the
+ * browser tab — the full marketing headline lives in the hero `<h1>`.
+ */
+const DOCUMENT_TITLE =
+  "Imersão em Marketplaces e Inteligência Tributária | Navecon Contabilidade";
 
 /** Anchor navigation targets (resolve to section ids). */
 const NAV_LINKS = [
@@ -53,7 +57,7 @@ const STATS = [
   { value: "2 dias", label: "Imersão presencial completa" },
   { value: "16–17 set", label: "Setembro de 2026" },
   { value: "Brusque · SC", label: "Navecon Contabilidade" },
-  { value: "Turma fechada", label: "Networking entre empresários" },
+  { value: "Vagas limitadas", label: "Networking entre empresários" },
 ] as const;
 
 export function App() {
@@ -86,8 +90,8 @@ export function App() {
             <SafeImage
               src={ASSETS.logo.light}
               alt="Navecon Contabilidade"
-              width={38}
-              height={38}
+              width={46}
+              height={46}
               fallback={<span aria-hidden="true">◆</span>}
             />
           </a>
@@ -184,8 +188,7 @@ export function App() {
             <div className="cta-band__text">
               <h2 className="section-title">Garanta sua vaga na imersão</h2>
               <p className="lead">
-                Vagas limitadas e turma fechada — garanta seu lugar antes de
-                esgotar.
+                Vagas limitadas — garanta seu lugar antes de esgotar.
               </p>
             </div>
             <RegistrationCta

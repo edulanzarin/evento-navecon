@@ -14,7 +14,6 @@
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
 import { App } from "./App";
-import { eventContent } from "./content/eventContent";
 
 describe("App page shell (Req 1.5, 1.1)", () => {
   it("sets the document language attribute to pt-BR (Req 1.5)", () => {
@@ -27,7 +26,8 @@ describe("App page shell (Req 1.5, 1.1)", () => {
     render(<App />);
 
     expect(document.title.trim().length).toBeGreaterThan(0);
-    expect(document.title).toContain(eventContent.eventName);
+    expect(document.title).toContain("Imersão");
+    expect(document.title).toContain("Navecon Contabilidade");
   });
 
   it("renders the header, main, and footer landmarks (Req 1.1)", () => {

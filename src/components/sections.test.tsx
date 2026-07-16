@@ -2,7 +2,7 @@
  * Example unit tests for the content-driven section components (task 10.6).
  *
  * These verify the section headings and the About/Speakers content contracts:
- *  - AboutSection renders the "Sobre o Evento" heading and the fixed event-format
+ *  - AboutSection renders its section heading and the fixed event-format
  *    summary, and shows EXACTLY ONE of the finalized detail or the pending
  *    placeholder (Req 5.1, 5.2, 5.3, 5.4, 5.5).
  *  - SpeakersSection renders the "Quem são os palestrantes" heading, exactly two
@@ -24,10 +24,12 @@ import { eventContent } from "../content/eventContent";
 import type { SpeakerContent } from "../content/types";
 
 describe("AboutSection (Req 5.1, 5.2)", () => {
-  it("renders the 'Sobre o Evento' heading", () => {
+  it("renders the section heading", () => {
     render(<AboutSection aboutDetail={null} />);
     expect(
-      screen.getByRole("heading", { name: "Sobre o Evento" })
+      screen.getByRole("heading", {
+        name: "O Próximo Nível da Sua Empresa Começa Aqui",
+      })
     ).toBeInTheDocument();
   });
 

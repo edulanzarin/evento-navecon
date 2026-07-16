@@ -25,23 +25,19 @@ export function PainPointsSection() {
         <h2 className="section-title">Você sente que...</h2>
       </div>
 
-      <ul className="grid-multi" data-testid="pain-points-list">
+      <ul className="grid-multi check-list" data-testid="pain-points-list">
         {PAIN_POINTS.map((point) => (
-          <li key={point} className="list-card">
+          <li key={point} className="check-item">
             {point}
           </li>
         ))}
       </ul>
 
-      <p
-        className="lead"
-        style={{
-          textAlign: "center",
-          marginTop: "2rem",
-          marginInline: "auto",
-        }}
-      >
-        Essa imersão foi feita <strong>para você</strong>.
+      {/* Closing banner: navy strip with golden light streaks on both sides. */}
+      <p className="made-for-you">
+        <span>
+          Essa imersão foi feita <strong>para você.</strong>
+        </span>
       </p>
     </section>
   );

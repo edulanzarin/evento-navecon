@@ -1,7 +1,7 @@
 /**
  * AboutSection — the "Sobre o Evento" section.
  *
- * - Renders the heading "Sobre o Evento" (Req 5.1) and a fixed event-format
+ * - Renders the section heading (Req 5.1) and a fixed event-format
  *   summary that always shows (Req 5.2).
  * - Resolves the detailed copy via {@link resolveText}: renders EXACTLY ONE of
  *   the finalized detail or the pending placeholder, never both (Req 5.3–5.5).
@@ -39,12 +39,12 @@ export function AboutSection({ aboutDetail, sideVideo }: AboutSectionProps) {
       <div className="section-head">
         <span className="eyebrow">Sobre o evento</span>
         <h2 id="about-heading" className="section-title">
-          Sobre o Evento
+          O Próximo Nível da Sua Empresa Começa Aqui
         </h2>
       </div>
 
       {/* Fixed format summary — always shown (Req 5.2). */}
-      <p className="lead">{FORMAT_SUMMARY}</p>
+      <p className="lead lead--strong">{FORMAT_SUMMARY}</p>
 
       {/* Exactly one of finalized detail or pending placeholder (Req 5.3–5.5). */}
       {detail.status === "finalized" ? (

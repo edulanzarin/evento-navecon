@@ -37,12 +37,12 @@
   --radius-lg: 26px;
 
   /* Single typeface across the whole page. */
-  --font-display: "Manrope", system-ui, sans-serif;
+  --font-display: "Montserrat", system-ui, sans-serif;
 
   /* Fixed header height (used to offset hero content). */
   --header-h: 72px;
 
-  font-family: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto,
+  font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif;
   line-height: 1.55;
   color-scheme: dark;
@@ -295,6 +295,12 @@ p {
   font-size: clamp(1rem, 0.95rem + 0.3vw, 1.15rem);
 }
 
+/* Emphasized lead: same color as the title, semibold. */
+.lead--strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
 /* Body copy that follows a .lead paragraph (e.g. the About detail). */
 .body-copy {
   margin-top: 1rem;
@@ -407,7 +413,7 @@ p {
 }
 
 .brand img {
-  height: 30px;
+  height: 46px;
   width: auto;
   display: block;
 }
@@ -657,8 +663,8 @@ p {
 
 .info-card__dates {
   display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 0.7rem;
   font-weight: 900;
   letter-spacing: -0.04em;
   line-height: 0.9;
@@ -668,17 +674,34 @@ p {
   font-size: clamp(3rem, 2rem + 5vw, 4.6rem);
 }
 
+/* Vertical accent bar between the two day numbers (per the reference art). */
+.info-card__daysep {
+  flex: none;
+  width: 5px;
+  height: clamp(2.1rem, 1.4rem + 3.5vw, 3.2rem);
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--accent-strong), var(--color-accent));
+  box-shadow: 0 0 14px rgba(212, 175, 55, 0.55);
+}
+
+/* Month stacked over the letter-spaced year, beside the numbers. */
 .info-card__month {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-left: 0.4rem;
   font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-text-large);
+  color: var(--color-text-primary);
 }
 
 .info-card__month strong {
-  display: block;
-  color: var(--color-text-primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  color: var(--color-accent);
 }
 
 .info-card__rows {
@@ -761,7 +784,7 @@ p {
 
 .stat {
   position: relative;
-  padding: clamp(1.3rem, 3vw, 1.9rem);
+  padding: clamp(1rem, 2.2vw, 1.35rem);
   border-radius: 16px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0)),
@@ -793,14 +816,21 @@ p {
 }
 
 .stat__value {
-  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.1rem);
+  font-size: clamp(1.15rem, 0.95rem + 0.9vw, 1.5rem);
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 
+/* Wide screens have room to keep each value on a single line. */
+@media (min-width: 769px) {
+  .stat__value {
+    white-space: nowrap;
+  }
+}
+
 .stat__label {
-  margin-top: 0.45rem;
-  font-size: 0.85rem;
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
   color: var(--color-text-large);
 }
 
@@ -929,6 +959,119 @@ p {
   line-height: 1.65;
   text-align: justify;
   hyphens: auto;
+}
+
+/* ── Checklist (pain points) — no boxes, gold check + hairline rows ───── */
+
+.check-list {
+  gap: 0 2.5rem;
+}
+
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 1rem 0.2rem;
+  border-bottom: 1px solid var(--hairline);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.check-item::before {
+  content: "✓";
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-top: 0.05rem;
+  border-radius: 50%;
+  border: 1px solid rgba(200, 162, 60, 0.45);
+  background: rgba(200, 162, 60, 0.08);
+  color: var(--color-accent);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+/* ── "Feita para você" closing banner (pain points) ────────────────────── */
+
+.made-for-you {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: clamp(2rem, 4vw, 2.75rem);
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1rem + 1.1vw, 1.65rem);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.made-for-you span {
+  flex: none;
+}
+
+.made-for-you strong {
+  color: var(--color-accent);
+  font-weight: 800;
+}
+
+/* Golden light streaks fading toward the edges. */
+.made-for-you::before,
+.made-for-you::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  min-width: 1.5rem;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-strong));
+  box-shadow: 0 0 14px rgba(212, 175, 55, 0.55);
+}
+
+.made-for-you::after {
+  background: linear-gradient(270deg, transparent, var(--accent-strong));
+}
+
+/* Narrow screens: drop the side streaks so the phrase never squeezes. */
+@media (max-width: 560px) {
+  .made-for-you {
+    justify-content: center;
+  }
+
+  .made-for-you::before,
+  .made-for-you::after {
+    display: none;
+  }
+}
+
+/* ── Numbered list (themes) — gold counters, no boxes ──────────────────── */
+
+.numbered-list {
+  counter-reset: numbered;
+  gap: 0 2.5rem;
+}
+
+.numbered-item {
+  counter-increment: numbered;
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 1.05rem 0.2rem;
+  border-bottom: 1px solid var(--hairline);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.numbered-item::before {
+  content: counter(numbered, decimal-leading-zero);
+  flex: none;
+  min-width: 2ch;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  color: var(--color-accent);
 }
 
 /* ── List items (themes / audience) ────────────────────────────────────── */
@@ -1578,7 +1721,7 @@ p {
   }
 
   .brand img {
-    height: 26px;
+    height: 36px;
   }
 
   .brand__name span {
@@ -1657,18 +1800,16 @@ p {
   position: relative;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid var(--hairline-strong);
+  border: 1px solid var(--accent-strong);
   box-shadow: var(--shadow-card);
   background: #000;
   transition:
     transform 0.25s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease;
+    box-shadow 0.25s ease;
 }
 
 .video-frame:hover {
   transform: translateY(-5px);
-  border-color: var(--accent-strong);
   box-shadow: 0 34px 80px -34px rgba(200, 162, 60, 0.75);
 }
 

@@ -93,7 +93,7 @@ export function HeroSection({
             crescer com segurança e lucratividade.
           </p>
 
-          <p className="hero__proof">Vagas limitadas · turma fechada</p>
+          <p className="hero__proof">Vagas limitadas · inscrição com antecedência</p>
 
           <div className="hero__actions">
             <RegistrationCta
@@ -119,6 +119,7 @@ export function HeroSection({
             {days.length === 2 ? (
               <>
                 <span className="info-card__day">{days[0]}</span>
+                <span className="info-card__daysep" aria-hidden="true" />
                 <span className="info-card__day">{days[1]}</span>
                 <span className="info-card__month">
                   {month}
@@ -173,13 +174,13 @@ export function HeroSection({
                 <div className="info-row__label">Formato</div>
                 <div className="info-row__value">
                   2 dias imersivos
-                  <small>100% presencial · turma fechada</small>
+                  <small>100% presencial · Brusque/SC</small>
                 </div>
               </div>
             </div>
           </div>
 
-          <p className="info-card__note">Vagas limitadas · turma fechada</p>
+          <p className="info-card__note">Vagas limitadas</p>
         </aside>
         </div>
       </div>

@@ -45,9 +45,9 @@ export function ThemesSection({ themes }: ThemesSectionProps) {
 
       {/* Exactly one of the themes list or the pending placeholder (Req 7.2–7.4). */}
       {resolved.status === "finalized" ? (
-        <ul className="grid-multi" data-testid="themes-list">
+        <ul className="grid-multi numbered-list" data-testid="themes-list">
           {resolved.value.map((theme, index) => (
-            <li key={`${index}-${theme}`} className="list-card">
+            <li key={`${index}-${theme}`} className="numbered-item">
               {theme}
             </li>
           ))}

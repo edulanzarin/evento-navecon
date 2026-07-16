@@ -48,9 +48,9 @@ export interface FaqItem {
  */
 export interface EventContent {
   // Fixed, known-now content
-  /** e.g. "Imersão Presencial com Mailson Junior e Fabio Edelberg" */
+  /** Hero headline, e.g. "Transforme sua empresa física em uma operação…" */
   eventName: string;
-  /** e.g. ["Fabio Edelberg", "Mailson Junior"] */
+  /** e.g. ["Fábio Edelberg", "Mailson Junior"] */
   speakerNames: [string, string];
   /** e.g. "16 e 17 de setembro de 2026" */
   dateLabel: string;

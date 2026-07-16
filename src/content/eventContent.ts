@@ -14,7 +14,7 @@ import type { EventContent } from "./types";
 export const eventContent: EventContent = {
   // Fixed, known-now content
   eventName:
-    "Transforme sua empresa física em uma operação de vendas escalável nos " +
+    "Transforme sua empresa física em uma máquina de vendas nos " +
     "maiores marketplaces do Brasil",
   speakerNames: ["Fábio Edelberg", "Mailson Junior"],
   dateLabel: "16 e 17 de setembro de 2026",
@@ -27,7 +27,7 @@ export const eventContent: EventContent = {
   aboutDetail:
     "A maioria dos treinamentos ensina apenas como vender mais. Nesta " +
     "imersão, você vai aprender a vender mais, organizar sua operação e " +
-    "preparar sua empresa para crescer com segurança — unindo duas " +
+    "preparar sua empresa para crescer com segurança, unindo duas " +
     "competências fundamentais: a estratégia comercial, os marketplaces, a " +
     "gestão e a escala com Mailson Junior, e a inteligência tributária, o " +
     "planejamento fiscal e a estrutura empresarial com Fábio Edelberg. Essa " +
