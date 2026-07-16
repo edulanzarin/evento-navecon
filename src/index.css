@@ -1212,11 +1212,13 @@ p {
 /* Address renders in two lines ("\n" in the content). */
 .location-address {
   white-space: pre-line;
+  font-weight: 700;
 }
 
 /* Breathing room between the detail grid and the "Abrir no mapa" button. */
 .location-card > .btn {
   margin-top: 1.6rem;
+  font-weight: 800;
 }
 
 .location-map {
@@ -1273,6 +1275,7 @@ p {
 
 .detail-label {
   font-size: 0.7rem;
+  font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-text-large);
