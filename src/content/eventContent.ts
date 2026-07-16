@@ -13,9 +13,7 @@ import type { EventContent } from "./types";
 
 export const eventContent: EventContent = {
   // Fixed, known-now content
-  eventName:
-    "Transforme sua empresa física em uma máquina de vendas nos " +
-    "maiores marketplaces do Brasil",
+  eventName: "Transforme sua empresa em uma máquina de vendas online",
   speakerNames: ["Fábio Edelberg", "Mailson Junior"],
   dateLabel: "16 e 17 de setembro de 2026",
   venueLabel: "Navecon Contabilidade – Unidade Brusque",
@@ -119,7 +117,7 @@ export const eventContent: EventContent = {
     {
       question: "Como faço minha inscrição?",
       answer:
-        "Basta clicar no botão \"Quero garantir minha vaga\" ou entrar em " +
+        'Basta clicar no botão "Quero garantir minha vaga" ou entrar em ' +
         "contato pelo WhatsApp oficial do evento. Nossa equipe apresentará " +
         "as formas de pagamento disponíveis, à vista e parceladas, e após a " +
         "confirmação do pagamento sua vaga será reservada.",
