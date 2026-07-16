@@ -929,6 +929,17 @@ p {
 @media (min-width: 860px) {
   .speaker-feature {
     grid-template-columns: minmax(280px, 400px) 1fr;
+    /* Photo column stretches to the card height so both always match. */
+    align-items: stretch;
+  }
+
+  .speaker-feature__media {
+    display: flex;
+  }
+
+  .speaker-feature__photo {
+    height: 100%;
+    aspect-ratio: auto;
   }
 
   .speaker-feature--flip {
@@ -958,17 +969,17 @@ p {
 }
 
 .speaker-bio {
-  margin-top: 0.9rem;
+  margin-top: 0.8rem;
   max-width: 62ch;
   color: var(--color-text-large);
-  font-size: 0.98rem;
-  line-height: 1.65;
+  font-size: 0.92rem;
+  line-height: 1.55;
   text-align: justify;
   hyphens: auto;
 }
 
 .speaker-bio + .speaker-bio {
-  margin-top: 0.65rem;
+  margin-top: 0.55rem;
 }
 
 .speaker-bio strong {
@@ -980,28 +991,28 @@ p {
 .speaker-highlights {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1rem 0 0;
+  gap: 0.45rem;
+  margin: 0.85rem 0 0;
   padding: 0;
   list-style: none;
 }
 
 .speaker-highlights li {
-  padding: 0.35rem 0.85rem;
+  padding: 0.28rem 0.75rem;
   border-radius: 999px;
   border: 1px solid rgba(200, 162, 60, 0.45);
   background: rgba(200, 162, 60, 0.08);
   color: var(--accent-strong);
   font-family: var(--font-display);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
 
 /* "Na imersão" callout after the bio. */
 .speaker-immersion {
-  margin-top: 1.25rem;
-  padding: 1rem 1.2rem;
+  margin-top: 1rem;
+  padding: 0.85rem 1.05rem;
   border-radius: 12px;
   border: 1px solid rgba(200, 162, 60, 0.35);
   border-left: 3px solid var(--color-accent);
@@ -1014,18 +1025,18 @@ p {
 
 .speaker-immersion__label {
   display: block;
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--color-accent);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.35rem;
 }
 
 .speaker-immersion p {
   color: var(--color-text-primary);
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 0.88rem;
+  line-height: 1.5;
   max-width: 60ch;
 }
 
