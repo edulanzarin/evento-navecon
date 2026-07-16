@@ -16,7 +16,6 @@
 import { describe, it, expect } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { Footer } from "./Footer";
-import { eventContent } from "../content/eventContent";
 import { PENDING_MESSAGES } from "../content/resolvers";
 import type { ContactDetail } from "../content/types";
 
@@ -28,12 +27,13 @@ describe("Footer", () => {
     expect(screen.getByText("Navecon Contabilidade")).toBeInTheDocument();
 
     // Full Brusque unit address in an <address> element (Req 13.2).
-    const address = screen.getByText(eventContent.fullAddress);
+    // Displayed across three lines, so assert each fact separately.
+    const address = screen.getByTestId("footer-address");
     expect(address).toBeInTheDocument();
     expect(address.tagName.toLowerCase()).toBe("address");
-    expect(address).toHaveTextContent(
-      "Av. 1º de Maio, 38 – Sala 12 – Centro 2, Brusque – SC, CEP 88353202"
-    );
+    expect(address).toHaveTextContent("Av. 1º de Maio, 38 – Sala 12");
+    expect(address).toHaveTextContent("Centro 2, Brusque – SC");
+    expect(address).toHaveTextContent("CEP 88353202");
 
     // While loading, SafeImage renders the real <img> for the light logo (Req 13.3).
     const logo = document.querySelector("img");
@@ -63,7 +63,9 @@ describe("Footer", () => {
       selector: "p",
     });
     expect(name).toBeInTheDocument();
-    expect(screen.getByText(eventContent.fullAddress)).toBeInTheDocument();
+    expect(screen.getByTestId("footer-address")).toHaveTextContent(
+      "Av. 1º de Maio, 38 – Sala 12"
+    );
   });
 
   it("renders contacts as a list with links for href and text otherwise (Req 13.5)", () => {

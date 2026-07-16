@@ -1514,18 +1514,109 @@ p {
   border-radius: 12px;
 }
 
+.footer-brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+}
+
+/* Divided columns row: Endereço · Contato · social icons. */
+.footer-cols {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+  margin-top: 1.25rem;
+  padding-block: clamp(1.5rem, 3vw, 2.25rem);
+  border-block: 1px solid var(--hairline);
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding-inline: 1rem;
+}
+
+.footer-col__icon {
+  color: var(--color-accent);
+  display: grid;
+  place-items: center;
+  min-height: 34px;
+}
+
+.footer-col__label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.footer-col address {
+  font-style: normal;
+  white-space: pre-line;
+  line-height: 1.6;
+}
+
 .footer-contacts {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.6rem 1.6rem;
+  flex-direction: column;
+  gap: 0.45rem;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .footer-contacts a {
+  color: var(--color-text-large);
+  transition: color 0.16s ease;
+}
+
+.footer-contacts a:hover {
   color: var(--color-accent);
+}
+
+.footer-col--social {
+  justify-content: center;
+}
+
+.footer-social {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  color: var(--color-accent);
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+
+.footer-social:hover {
+  transform: translateY(-3px);
+  background: rgba(200, 162, 60, 0.1);
+}
+
+.footer-copy {
+  margin-top: 0.5rem;
+  font-size: 0.88rem;
+  color: var(--color-text-large);
+}
+
+@media (min-width: 769px) {
+  .footer-cols {
+    grid-template-columns: 1.3fr 1.3fr 0.7fr 0.7fr;
+    gap: 0;
+  }
+
+  .footer-col + .footer-col {
+    border-left: 1px solid var(--hairline);
+  }
 }
 
 /* ── Countdown ─────────────────────────────────────────────────────────── */
