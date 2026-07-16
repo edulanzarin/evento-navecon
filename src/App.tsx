@@ -216,16 +216,11 @@ export function App() {
         <div id="depoimentos">
           <section className="section media" aria-label="Depoimentos de clientes">
             <div className="section-head section-head--center">
-              <span className="eyebrow">Depoimentos</span>
+              <span className="eyebrow">Resultados reais</span>
               <h2 className="section-title">
-              O que os clientes dizem sobre a Navecon
-            </h2>
-            <p className="lead">
-              Empresários que já são clientes contam, na prática, como a Navecon
-              organizou a contabilidade, protegeu a margem e trouxe
-              previsibilidade pro caixa do negócio.
-            </p>
-          </div>
+                Resultados compartilhados por nossos clientes
+              </h2>
+            </div>
           <div className="media-feature">
             <VideoPlayer
               src={ASSETS.video.imersao}

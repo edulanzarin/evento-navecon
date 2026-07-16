@@ -125,7 +125,7 @@ export const eventContent: EventContent = {
         "conteúdo prático ministrado por Mailson Junior e Fábio Edelberg.",
     },
     {
-      question: "Preciso já vender em marketplaces?",
+      question: "Preciso ter experiência com marketplaces?",
       answer:
         "Não. A imersão atende tanto empresários que desejam iniciar sua " +
         "operação quanto empresas que já vendem online e querem estruturar " +
@@ -136,8 +136,8 @@ export const eventContent: EventContent = {
       answer:
         'Basta clicar no botão "Quero garantir minha vaga" ou entrar em ' +
         "contato pelo WhatsApp oficial do evento. Nossa equipe apresentará " +
-        "as formas de pagamento disponíveis, à vista e parceladas, e após a " +
-        "confirmação do pagamento sua vaga será reservada.",
+        "as formas de pagamento disponíveis, e após a confirmação do " +
+        "pagamento sua vaga será reservada.",
     },
     {
       question: "As vagas são limitadas?",

@@ -158,8 +158,8 @@ export function RegistrationForm({
             Inscreva-se
           </h2>
           <p className="lead">
-            Vagas limitadas. Preencha os dados e nosso time entra em contato
-            para confirmar sua participação.
+            <strong>Vagas limitadas.</strong> Preencha os dados e nosso time
+            entra em contato para confirmar sua participação.
           </p>
         </div>
 

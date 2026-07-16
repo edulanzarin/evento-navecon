@@ -301,6 +301,12 @@ p {
   font-weight: 600;
 }
 
+/* Bold highlights inside lead copy render white for emphasis. */
+.lead strong {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
 /* Body copy that follows a .lead paragraph (e.g. the About detail). */
 .body-copy {
   margin-top: 1rem;
