@@ -149,21 +149,16 @@ export const eventContent: EventContent = {
     },
   ],
   contacts: [
-    { kind: "phone", label: "(47) 3000-0000", href: "tel:+554730000000" },
-    {
-      kind: "email",
-      label: "contato@navecon.com.br",
-      href: "mailto:contato@navecon.com.br",
-    },
+    { kind: "phone", label: "(47) 3319-0420", href: "tel:+554733190420" },
     {
       kind: "instagram",
-      label: "@navecon",
-      href: "https://instagram.com/navecon",
+      label: "@naveconcontabilidade",
+      href: "https://instagram.com/naveconcontabilidade",
     },
     {
       kind: "whatsapp",
       label: "Fale no WhatsApp",
-      href: "https://wa.me/5547900000000",
+      href: "https://wa.me/554733190420",
     },
   ],
 
