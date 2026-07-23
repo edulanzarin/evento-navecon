@@ -1,0 +1,13 @@
+# Caddy termina o TLS (certificado automático via Let's Encrypt para $DOMAIN) e
+# faz proxy para o app na rede interna do compose. Segurança extra nos headers.
+{$DOMAIN} {
+	encode gzip zstd
+	reverse_proxy app:3000
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}

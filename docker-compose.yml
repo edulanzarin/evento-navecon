@@ -10,8 +10,10 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-evento}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
       POSTGRES_DB: ${POSTGRES_DB:-evento_navecon}
+    # Só loopback: o banco nunca fica exposto à internet. O app fala com ele
+    # pela rede interna (db:5432); a porta publicada é só pra psql do host.
     ports:
-      - "${DB_PORT:-5099}:5432"
+      - "127.0.0.1:${DB_PORT:-5099}:5432"
     volumes:
       - evento-navecon-db-data:/var/lib/postgresql/data
     networks: [evento-navecon-net]
@@ -57,8 +59,10 @@ services:
       PGUSER: ${POSTGRES_USER:-evento}
       PGPASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
       PGDATABASE: ${POSTGRES_DB:-evento_navecon}
+    # Só loopback por padrão: em produção o Caddy (docker-compose.prod.yml) é
+    # quem publica 80/443 com TLS e faz proxy pra app:3000 pela rede interna.
     ports:
-      - "${APP_PORT:-4099}:3000"
+      - "127.0.0.1:${APP_PORT:-4099}:3000"
     depends_on:
       db:
         condition: service_healthy

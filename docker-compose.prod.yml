@@ -1,0 +1,28 @@
+# Override de produção: põe um reverse proxy Caddy na frente, com HTTPS
+# automático (Let's Encrypt) para o domínio. O app continua só na rede interna.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Requer no .env: DOMAIN (ex.: imersao.navecon.com.br) apontando (DNS A/AAAA)
+# para o IP do servidor, e PUBLIC_BASE_URL=https://$DOMAIN.
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: evento-navecon-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?defina DOMAIN no .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - evento-navecon-caddy-data:/data
+      - evento-navecon-caddy-config:/config
+    depends_on:
+      - app
+    networks: [evento-navecon-net]
+
+volumes:
+  evento-navecon-caddy-data:
+  evento-navecon-caddy-config:

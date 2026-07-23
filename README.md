@@ -58,6 +58,32 @@ docker exec -it evento-navecon-db psql -U evento -d evento_navecon \
   -c "select full_name, email, status, payment_method, installments, paid_at from registrations order by created_at desc;"
 ```
 
+## Produção (domínio + HTTPS)
+
+O app e o banco publicam portas **só em loopback** — nada fica exposto direto na
+internet. Quem atende o mundo é o **Caddy** (reverse proxy) do
+`docker-compose.prod.yml`, com **HTTPS automático** (Let's Encrypt):
+
+1. No `.env`: `DOMAIN=seu-dominio.com` e `PUBLIC_BASE_URL=https://seu-dominio.com`.
+2. DNS: um registro **A/AAAA** do domínio apontando pro IP do servidor.
+3. Servidor com as portas **80 e 443** abertas.
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+```
+
+O Caddy emite e renova o certificado sozinho e faz proxy pra `app:3000`.
+
+## Segurança
+
+- **Segredos** só no `.env` (fora do git e fora da imagem Docker). Rotacione se vazarem.
+- **Headers** via helmet: CSP, HSTS, X-Frame-Options, nosniff; sem `X-Powered-By`.
+- **Rate limit** por IP: mais rígido no `/api/register` (15 / 10 min); o webhook fica de fora.
+- **Banco nunca exposto**: publicado só em `127.0.0.1`; o app fala por rede interna.
+- **Webhook confiável por design**: o handler não confia no payload — busca o
+  pagamento real no Mercado Pago antes de marcar como pago. SQL parametrizado.
+- **TLS** terminado no Caddy; o app roda atrás do proxy (`trust proxy`).
+
 ## No painel do Mercado Pago
 
 - Ative **pix** e o **parcelamento até 6x** (as parcelas saem **com juros pro
