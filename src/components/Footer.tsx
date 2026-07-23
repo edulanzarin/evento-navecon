@@ -1,12 +1,13 @@
 /**
  * Footer — the page footer content (task 11.7).
  *
- * Renders the brand name "Navecon Contabilidade" (Req 13.1), the full Brusque
- * unit address (Req 13.2), and the light logo variant through {@link SafeImage}
- * (Req 13.3). If the logo fails to load, SafeImage swaps in an equal-dimension
- * placeholder block while the rest of the footer stays visible (Req 13.4).
+ * Renders the full Navecon footer lockup — the symbol plus the "Navecon
+ * Contabilidade e Assessoria" wordmark as a single image (Req 13.1/13.3) —
+ * along with the full Brusque unit address (Req 13.2), through {@link SafeImage}.
+ * If the logo fails to load, SafeImage swaps in an equal-dimension placeholder
+ * carrying the brand name so the rest of the footer stays visible (Req 13.4).
  *
- * Layout follows the Navecon institutional footer: centered logo, a divided
+ * Layout follows the Navecon institutional footer: centered lockup, a divided
  * row of columns (Endereço · Contato · social icons), and a copyright line.
  *
  * Contact details render as distinct items when at least one is provided
@@ -26,8 +27,10 @@ import { PENDING_MESSAGES } from "../content/resolvers";
 import type { ContactDetail } from "../content/types";
 import { SafeImage } from "./SafeImage";
 
-/** Reserved logo box so the footer layout stays stable while media loads. */
-const LOGO_SIZE = 84;
+/** Reserved logo box so the footer layout stays stable while media loads.
+ *  Matches the footer lockup aspect ratio (~1.82:1) so it fills without letterbox. */
+const LOGO_WIDTH = 200;
+const LOGO_HEIGHT = 110;
 
 /** Contact kinds rendered as icon-only social columns. */
 const SOCIAL_KINDS: ContactDetail["kind"][] = ["instagram", "whatsapp"];
@@ -128,21 +131,19 @@ export function Footer({
 
   return (
     <div className="footer-content">
-      {/* Light logo with an equal-dimension placeholder fallback (Req 13.3/13.4). */}
+      {/* Full footer lockup (symbol + brand text) with a placeholder fallback
+          (Req 13.1/13.3/13.4). */}
       <SafeImage
-        src={ASSETS.logo.light}
+        src={ASSETS.logo.footer}
         alt="Navecon Contabilidade"
-        width={LOGO_SIZE}
-        height={LOGO_SIZE}
+        width={LOGO_WIDTH}
+        height={LOGO_HEIGHT}
         fallback={
           <div role="img" aria-label="Navecon Contabilidade">
             Navecon Contabilidade
           </div>
         }
       />
-
-      {/* Brand name (Req 13.1). */}
-      <p className="footer-brand">Navecon Contabilidade</p>
 
       <div className="footer-cols">
         {/* Full Brusque unit address (Req 13.2). */}
@@ -178,22 +179,24 @@ export function Footer({
             )}
 
             {socialContacts.map((contact, index) => (
-              <div
-                className="footer-col footer-col--social"
-                key={`${contact.kind}-${index}`}
-              >
-                <a
-                  className="footer-social"
-                  href={contact.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={contact.label}
-                >
+              <div className="footer-col" key={`${contact.kind}-${index}`}>
+                <span className="footer-col__icon">
                   {contact.kind === "instagram" ? (
                     <InstagramIcon />
                   ) : (
                     <WhatsAppIcon />
                   )}
+                </span>
+                <span className="footer-col__label">
+                  {contact.kind === "instagram" ? "Instagram" : "WhatsApp"}
+                </span>
+                <a
+                  className="footer-social-link"
+                  href={contact.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {contact.label}
                 </a>
               </div>
             ))}

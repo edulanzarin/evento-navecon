@@ -11,6 +11,7 @@ describe("ASSETS map", () => {
   const allPaths = [
     ASSETS.logo.light,
     ASSETS.logo.dark,
+    ASSETS.logo.footer,
     ASSETS.video.background,
     ASSETS.video.imersao,
     ASSETS.video.evento,
@@ -41,6 +42,7 @@ describe("ASSETS map", () => {
   it("maps each asset to its expected renamed destination", () => {
     expect(ASSETS.logo.light).toBe("/assets/logo/icon-light.png");
     expect(ASSETS.logo.dark).toBe("/assets/logo/icon-dark.png");
+    expect(ASSETS.logo.footer).toBe("/assets/logo/logo-footer.png");
     expect(ASSETS.video.background).toBe("/assets/video/background.mp4");
     expect(ASSETS.video.imersao).toBe("/assets/video/imersao.mp4");
     expect(ASSETS.video.evento).toBe("/assets/video/evento.mp4");

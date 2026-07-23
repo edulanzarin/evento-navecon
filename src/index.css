@@ -1088,7 +1088,10 @@ p {
 }
 
 .made-for-you span {
-  flex: none;
+  /* Grow: 0 so the side streaks (flex: 1) take the free space and the phrase
+     stays on one line when it fits; shrink: 1 so it wraps instead of
+     overflowing when the row gets narrow. */
+  flex: 0 1 auto;
 }
 
 .made-for-you strong {
@@ -1112,10 +1115,13 @@ p {
   background: linear-gradient(270deg, transparent, var(--accent-strong));
 }
 
-/* Narrow screens: drop the side streaks so the phrase never squeezes. */
-@media (max-width: 560px) {
+/* Tablet and below: drop the side streaks and let the phrase wrap centered,
+   so the longer banners never overflow or squeeze on small screens. */
+@media (max-width: 768px) {
   .made-for-you {
     justify-content: center;
+    text-align: center;
+    text-wrap: balance;
   }
 
   .made-for-you::before,
@@ -1229,13 +1235,12 @@ p {
 /* Address renders in two lines ("\n" in the content). */
 .location-address {
   white-space: pre-line;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 /* Breathing room between the detail grid and the "Abrir no mapa" button. */
 .location-card > .btn {
   margin-top: 1.6rem;
-  font-weight: 800;
 }
 
 .location-map {
@@ -1300,7 +1305,7 @@ p {
 
 .detail-value {
   margin-top: 0.25rem;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 @media (min-width: 900px) {
@@ -1549,6 +1554,12 @@ p {
   min-height: 34px;
 }
 
+/* Normalize every column icon to the same size so all four align. */
+.footer-col__icon svg {
+  width: 26px;
+  height: 26px;
+}
+
 .footer-col__label {
   font-size: 0.72rem;
   font-weight: 800;
@@ -1581,25 +1592,16 @@ p {
   color: var(--color-accent);
 }
 
-.footer-col--social {
-  justify-content: center;
+/* Social columns (Instagram/WhatsApp): the handle/action as a link, kept on a
+   single line so "@naveconcontabilidade" never breaks mid-word. */
+.footer-social-link {
+  color: var(--color-text-large);
+  white-space: nowrap;
+  transition: color 0.16s ease;
 }
 
-.footer-social {
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
+.footer-social-link:hover {
   color: var(--color-accent);
-  transition:
-    transform 0.18s ease,
-    background 0.18s ease;
-}
-
-.footer-social:hover {
-  transform: translateY(-3px);
-  background: rgba(200, 162, 60, 0.1);
 }
 
 .footer-copy {
@@ -1608,9 +1610,18 @@ p {
   color: var(--color-text-large);
 }
 
-@media (min-width: 769px) {
+/* Two columns on small screens / tablets: the wider tracks keep every value
+   (address, phone, @handle) comfortably on one line. */
+@media (min-width: 560px) {
   .footer-cols {
-    grid-template-columns: 1.3fr 1.3fr 0.7fr 0.7fr;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Full institutional row with vertical dividers only where there's real room. */
+@media (min-width: 1000px) {
+  .footer-cols {
+    grid-template-columns: repeat(4, 1fr);
     gap: 0;
   }
 

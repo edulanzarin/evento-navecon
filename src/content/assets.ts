@@ -18,6 +18,8 @@ export interface AssetMap {
     readonly light: string;
     /** Dark logo variant reserved for light-on-light contexts. */
     readonly dark: string;
+    /** Full footer lockup: symbol + "Navecon Contabilidade e Assessoria" text. */
+    readonly footer: string;
   };
   readonly video: {
     /** Hero ambient background loop (first 10s, muted). */
@@ -51,6 +53,7 @@ export const ASSETS: AssetMap = {
   logo: {
     light: withBase("/assets/logo/icon-light.png"),
     dark: withBase("/assets/logo/icon-dark.png"),
+    footer: withBase("/assets/logo/logo-footer.png"),
   },
   video: {
     background: withBase("/assets/video/background.mp4"),

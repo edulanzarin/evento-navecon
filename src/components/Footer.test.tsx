@@ -20,11 +20,8 @@ import { PENDING_MESSAGES } from "../content/resolvers";
 import type { ContactDetail } from "../content/types";
 
 describe("Footer", () => {
-  it("renders the brand name, full address, and light logo (Req 13.1/13.2/13.3)", () => {
+  it("renders the brand lockup and full address (Req 13.1/13.2/13.3)", () => {
     render(<Footer contacts={[]} />);
-
-    // Brand name (Req 13.1).
-    expect(screen.getByText("Navecon Contabilidade")).toBeInTheDocument();
 
     // Full Brusque unit address in an <address> element (Req 13.2).
     // Displayed across three lines, so assert each fact separately.
@@ -35,11 +32,12 @@ describe("Footer", () => {
     expect(address).toHaveTextContent("Centro 2, Brusque – SC");
     expect(address).toHaveTextContent("CEP 88353202");
 
-    // While loading, SafeImage renders the real <img> for the light logo (Req 13.3).
+    // While loading, SafeImage renders the real <img> for the footer lockup;
+    // its alt carries the brand name (Req 13.1/13.3).
     const logo = document.querySelector("img");
     expect(logo).not.toBeNull();
     expect((logo as HTMLImageElement).getAttribute("src")).toMatch(
-      /\/assets\/logo\/icon-light\.png$/
+      /\/assets\/logo\/logo-footer\.png$/
     );
     expect((logo as HTMLImageElement).alt).toBe("Navecon Contabilidade");
   });
@@ -52,17 +50,14 @@ describe("Footer", () => {
 
     fireEvent.error(logo as HTMLImageElement);
 
-    // The <img> is replaced by the custom fallback block (role="img").
+    // The <img> is replaced by the custom fallback block (role="img") that
+    // still carries the brand name (Req 13.1).
     expect(document.querySelector("img")).toBeNull();
     expect(
       screen.getByRole("img", { name: "Navecon Contabilidade" })
     ).toBeInTheDocument();
 
-    // The rest of the footer stays visible: brand name <p> and the address.
-    const name = screen.getByText("Navecon Contabilidade", {
-      selector: "p",
-    });
-    expect(name).toBeInTheDocument();
+    // The rest of the footer stays visible: the address.
     expect(screen.getByTestId("footer-address")).toHaveTextContent(
       "Av. 1º de Maio, 38 – Sala 12"
     );
