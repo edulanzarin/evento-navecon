@@ -90,8 +90,8 @@ export function App() {
             <SafeImage
               src={ASSETS.logo.light}
               alt="Navecon Contabilidade"
-              width={46}
-              height={46}
+              width={101}
+              height={44}
               fallback={<span aria-hidden="true">◆</span>}
             />
           </a>
