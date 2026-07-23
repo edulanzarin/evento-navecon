@@ -8,6 +8,13 @@ export default defineConfig(({ mode }) => ({
   // root everywhere else (dev server, tests, the nginx/Docker deploy).
   base: mode === "ghpages" ? "/evento-navecon/" : "/",
   plugins: [react()],
+  // Dev only: proxy /api to the backend (app container / npm run server:dev on
+  // 4099), so `npm run dev` exercises the real registration + payment flow.
+  server: {
+    proxy: {
+      "/api": "http://localhost:4099",
+    },
+  },
   test: {
     globals: true,
     environment: "jsdom",
