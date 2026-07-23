@@ -158,7 +158,7 @@ export const eventContent: EventContent = {
     {
       kind: "whatsapp",
       label: "Fale no WhatsApp",
-      href: "https://wa.me/554733190420",
+      href: "https://wa.me/554792370273",
     },
   ],
 
