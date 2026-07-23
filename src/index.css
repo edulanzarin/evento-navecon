@@ -1497,6 +1497,65 @@ p {
   }
 }
 
+/* ── Payment return page (Mercado Pago back_urls) ──────────────────────── */
+
+.payment-result {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.5rem, 5vw, 3rem);
+}
+
+/* Single-column, centered — override the form-card's two-column desktop grid. */
+.payment-result__card {
+  display: block;
+  max-width: 540px;
+  text-align: center;
+}
+
+.payment-result__badge {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 1.25rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.payment-result__badge--paid {
+  color: var(--success);
+  background: rgba(52, 211, 154, 0.12);
+  border: 1px solid rgba(52, 211, 154, 0.4);
+}
+
+.payment-result__badge--pending {
+  color: var(--color-accent);
+  background: rgba(200, 162, 60, 0.12);
+  border: 1px solid rgba(200, 162, 60, 0.4);
+}
+
+.payment-result__badge--failed {
+  color: #ff8585;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.35);
+}
+
+.payment-result__detail {
+  justify-content: center;
+  max-width: 320px;
+  margin: 1.5rem auto 0;
+  text-align: left;
+}
+
+.payment-result__back {
+  margin-top: 1.75rem;
+}
+
 /* ── Footer ────────────────────────────────────────────────────────────── */
 
 .page-footer {

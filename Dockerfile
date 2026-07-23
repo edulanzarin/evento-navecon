@@ -8,7 +8,10 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-# Vite inlines VITE_* at build time; the SPA calls the API on the same origin.
+# Vite inlines VITE_* at build time. The SPA and API share an origin, so the
+# registration endpoint is the relative /api/register.
+ARG VITE_REGISTRATION_ENDPOINT=/api/register
+ENV VITE_REGISTRATION_ENDPOINT=$VITE_REGISTRATION_ENDPOINT
 RUN npm run build
 
 # ── Runtime stage: production deps + Node server that serves the SPA + API ─

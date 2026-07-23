@@ -73,7 +73,7 @@ function getCompanyInput(): HTMLInputElement {
 }
 function getSubmitButton(): HTMLButtonElement {
   return screen.getByRole("button", {
-    name: /(Confirmar inscrição|Enviando)/,
+    name: /(Ir para o pagamento|Enviando|Redirecionando)/,
   }) as HTMLButtonElement;
 }
 
@@ -213,6 +213,28 @@ describe("RegistrationForm", () => {
         company: null,
       });
       expect(signal).toBeInstanceOf(AbortSignal);
+    });
+
+    it("redirects to the checkout URL when the submitter returns one", async () => {
+      const user = userEvent.setup();
+      const { submitter, submit } = mockSubmitter({
+        ok: true,
+        redirectUrl: "https://mp.example/checkout/xyz",
+      });
+      const redirect = vi.fn();
+      render(<RegistrationForm submitter={submitter} redirect={redirect} />);
+
+      await fillValid(user);
+      await user.click(getSubmitButton());
+
+      // A "redirecting" status shows and the browser is sent to the checkout.
+      expect(
+        await screen.findByTestId("registration-redirecting"),
+      ).toBeInTheDocument();
+      expect(redirect).toHaveBeenCalledWith("https://mp.example/checkout/xyz");
+      expect(submit).toHaveBeenCalledTimes(1);
+      // It does NOT fall into the plain success state.
+      expect(screen.queryByTestId("registration-success")).toBeNull();
     });
   });
 

@@ -43,8 +43,14 @@ import {
 /** pt-BR confirmation/error messages surfaced by the form (Req 10.2, 10.7). */
 export const FORM_MESSAGES = {
   success: "Inscrição realizada com sucesso!",
+  redirecting: "Tudo certo! Redirecionando para o pagamento seguro…",
   error: "Não foi possível concluir sua inscrição. Tente novamente.",
 } as const;
+
+/** Default browser navigation to the checkout URL (overridable for tests). */
+const defaultRedirect = (url: string): void => {
+  window.location.assign(url);
+};
 
 /** Maximum input lengths per field (Req 10.1). */
 const MAX_LENGTHS = {
@@ -68,9 +74,14 @@ export interface RegistrationFormProps {
    * internal ref is used.
    */
   firstInputRef?: RefObject<HTMLInputElement>;
+  /**
+   * Navigates the browser to the checkout URL on a successful submission that
+   * returns one. Defaults to `window.location.assign`; injected in tests.
+   */
+  redirect?: (url: string) => void;
 }
 
-type SubmitState = "idle" | "submitting" | "success" | "error";
+type SubmitState = "idle" | "submitting" | "redirecting" | "success" | "error";
 
 /**
  * Controlled, accessible registration form. See module docs for the full
@@ -79,6 +90,7 @@ type SubmitState = "idle" | "submitting" | "success" | "error";
 export function RegistrationForm({
   submitter,
   firstInputRef,
+  redirect = defaultRedirect,
 }: RegistrationFormProps) {
   // Resolve the submitter once: prefer the injected one, else build the
   // environment-selected default.
@@ -99,13 +111,14 @@ export function RegistrationForm({
   const [errors, setErrors] = useState<FieldErrors>({});
   const [state, setState] = useState<SubmitState>("idle");
 
-  const submitting = state === "submitting";
+  // Busy = the form is working or handing off to checkout; controls stay locked.
+  const busy = state === "submitting" || state === "redirecting";
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     // Guard against duplicate submissions while one is in flight (Req 10.6).
-    if (submitting) {
+    if (busy) {
       return;
     }
 
@@ -133,9 +146,16 @@ export function RegistrationForm({
         result.value,
         controller.signal,
       );
-      // Success → confirmation; non-OK → error, re-enabling submit and
-      // retaining values (Req 10.2, 10.7).
-      setState(outcome.ok ? "success" : "error");
+      if (outcome.ok && outcome.redirectUrl) {
+        // Registration saved → hand off to the payment checkout. Keep controls
+        // locked ("redirecting") while the browser navigates away.
+        setState("redirecting");
+        redirect(outcome.redirectUrl);
+      } else {
+        // Success without a checkout URL (dev/placeholder) → confirmation;
+        // non-OK → error, re-enabling submit and retaining values (Req 10.2, 10.7).
+        setState(outcome.ok ? "success" : "error");
+      }
     } catch {
       // Rejection/abort/timeout → error, re-enable submit, retain values
       // (Req 10.7).
@@ -158,8 +178,8 @@ export function RegistrationForm({
             Inscreva-se
           </h2>
           <p className="lead">
-            <strong>Vagas limitadas.</strong> Preencha os dados e nosso time
-            entra em contato para confirmar sua participação.
+            <strong>Vagas limitadas.</strong> Preencha os dados e siga para o
+            pagamento seguro — cartão em até 6x ou pix.
           </p>
         </div>
 
@@ -181,7 +201,7 @@ export function RegistrationForm({
               aria-describedby={
                 errors.fullName ? "reg-full-name-error" : undefined
               }
-              disabled={submitting}
+              disabled={busy}
             />
             {errors.fullName && (
               <span id="reg-full-name-error" role="alert" className="field-error">
@@ -205,7 +225,7 @@ export function RegistrationForm({
               autoComplete="email"
               aria-invalid={errors.email ? true : undefined}
               aria-describedby={errors.email ? "reg-email-error" : undefined}
-              disabled={submitting}
+              disabled={busy}
             />
             {errors.email && (
               <span id="reg-email-error" role="alert" className="field-error">
@@ -229,7 +249,7 @@ export function RegistrationForm({
               autoComplete="tel"
               aria-invalid={errors.phone ? true : undefined}
               aria-describedby={errors.phone ? "reg-phone-error" : undefined}
-              disabled={submitting}
+              disabled={busy}
             />
             {errors.phone && (
               <span id="reg-phone-error" role="alert" className="field-error">
@@ -249,15 +269,28 @@ export function RegistrationForm({
               onChange={(e) => setCompany(e.target.value)}
               maxLength={MAX_LENGTHS.company}
               autoComplete="organization"
-              disabled={submitting}
+              disabled={busy}
             />
           </div>
 
-          <button type="submit" disabled={submitting} className="btn btn-primary">
-            {submitting ? "Enviando…" : "Confirmar inscrição"}
+          <button type="submit" disabled={busy} className="btn btn-primary">
+            {state === "submitting"
+              ? "Enviando…"
+              : state === "redirecting"
+                ? "Redirecionando…"
+                : "Ir para o pagamento"}
           </button>
 
           {/* Async outcome messages (Req 10.2, 10.7). */}
+          {state === "redirecting" && (
+            <p
+              data-testid="registration-redirecting"
+              role="status"
+              className="form-status form-status--ok"
+            >
+              {FORM_MESSAGES.redirecting}
+            </p>
+          )}
           {state === "success" && (
             <p
               data-testid="registration-success"

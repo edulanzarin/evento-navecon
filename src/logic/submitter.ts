@@ -27,8 +27,14 @@ import { VITE_REGISTRATION_ENDPOINT } from '../theme/env';
 /** Default submission timeout in milliseconds (Req 10.7). */
 export const SUBMIT_TIMEOUT_MS = 30_000;
 
-/** Discriminated result of a registration submission. */
-export type SubmitResult = { ok: true } | { ok: false; reason: string };
+/**
+ * Discriminated result of a registration submission. On success, the backend
+ * may return a `redirectUrl` (the Mercado Pago checkout link) for the form to
+ * navigate to; when absent (dev/placeholder), the form shows a confirmation.
+ */
+export type SubmitResult =
+  | { ok: true; redirectUrl?: string }
+  | { ok: false; reason: string };
 
 /**
  * Abstraction over the registration destination. Implementations MUST resolve
@@ -102,7 +108,16 @@ export class HttpSubmitter implements RegistrationSubmitter {
       });
 
       if (res.ok) {
-        return { ok: true };
+        // The backend returns `{ checkoutUrl }` to redirect to payment; a body
+        // that is missing/not JSON (e.g. a plain 200) is still a success.
+        let redirectUrl: string | undefined;
+        try {
+          const data = (await res.json()) as { checkoutUrl?: unknown };
+          if (typeof data?.checkoutUrl === "string") redirectUrl = data.checkoutUrl;
+        } catch {
+          /* no JSON body — plain OK */
+        }
+        return redirectUrl ? { ok: true, redirectUrl } : { ok: true };
       }
 
       return { ok: false, reason: `HTTP ${res.status}` };

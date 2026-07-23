@@ -68,6 +68,23 @@ describe('HttpSubmitter', () => {
     expect(opts.signal).toBeInstanceOf(AbortSignal);
   });
 
+  it('extracts a checkoutUrl from the JSON body into redirectUrl (Req 10.2)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        registrationId: 'abc',
+        checkoutUrl: 'https://mp.example/checkout/xyz',
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const submitter = new HttpSubmitter('https://example.com/submit');
+    const result = await submitter.submit(payload, new AbortController().signal);
+
+    expect(result).toEqual({ ok: true, redirectUrl: 'https://mp.example/checkout/xyz' });
+  });
+
   it('resolves { ok: false } with a reason containing the status on non-OK (Req 10.7)', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 500 });
     vi.stubGlobal('fetch', fetchMock);

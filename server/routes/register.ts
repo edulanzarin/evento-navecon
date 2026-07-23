@@ -26,7 +26,8 @@ function parse(body: unknown): ParseResult {
   const b = (body ?? {}) as Record<string, unknown>;
   const fullName = String(b.fullName ?? "").trim();
   const email = String(b.email ?? "").trim();
-  const phone = String(b.phone ?? "").trim();
+  // O frontend envia `phoneDigits` (só dígitos); aceita `phone` também.
+  const phone = String(b.phone ?? b.phoneDigits ?? "").trim();
   const company = String(b.company ?? "").trim();
 
   const errors: Record<string, string> = {};
