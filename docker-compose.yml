@@ -1,13 +1,74 @@
+# Compose igual em dev e produção. Sobe app + db + migrate seguindo o chassi:
+# <slug>-app / <slug>-db / <slug>-migrate, rede e volume por slug, portas por env.
+name: evento-navecon
+
 services:
-  web:
+  db:
+    image: postgres:16-alpine
+    container_name: evento-navecon-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-evento}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: ${POSTGRES_DB:-evento_navecon}
+    ports:
+      - "${DB_PORT:-5099}:5432"
+    volumes:
+      - evento-navecon-db-data:/var/lib/postgresql/data
+    networks: [evento-navecon-net]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-evento} -d ${POSTGRES_DB:-evento_navecon}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  # Migrations em container próprio: roda uma vez, aplica o pendente e sai.
+  migrate:
+    image: evento-navecon-app
     build:
       context: .
-      args:
-        # Set the registration endpoint at build time if you have one;
-        # leave empty to use the built-in placeholder submitter.
-        VITE_REGISTRATION_ENDPOINT: ${VITE_REGISTRATION_ENDPOINT:-}
-    image: navecon-landing
-    container_name: navecon-landing
+      target: runtime
+    container_name: evento-navecon-migrate
+    command: ["npx", "tsx", "server/migrate.ts"]
+    environment:
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: ${POSTGRES_USER:-evento}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      PGDATABASE: ${POSTGRES_DB:-evento_navecon}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [evento-navecon-net]
+    restart: "no"
+
+  app:
+    image: evento-navecon-app
+    build:
+      context: .
+      target: runtime
+    container_name: evento-navecon-app
+    env_file: .env
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: "3000"
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: ${POSTGRES_USER:-evento}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      PGDATABASE: ${POSTGRES_DB:-evento_navecon}
     ports:
-      - "8080:80"
+      - "${APP_PORT:-4099}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    networks: [evento-navecon-net]
     restart: unless-stopped
+
+volumes:
+  evento-navecon-db-data:
+
+networks:
+  evento-navecon-net:

@@ -24,3 +24,8 @@ dist-ssr
 
 # Vite / TS build info
 *.tsbuildinfo
+
+# Segredos de ambiente (MP, SMTP, Postgres) — nunca versionar. Só o .env.example.
+.env
+.env.*
+!.env.example
