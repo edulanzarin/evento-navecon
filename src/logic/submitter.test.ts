@@ -5,6 +5,7 @@ import {
   SUBMIT_TIMEOUT_MS,
   createRegistrationSubmitter,
 } from './submitter';
+import { VITE_REGISTRATION_ENDPOINT } from '../theme/env';
 import type { RegistrationPayload } from './validation';
 
 /**
@@ -35,9 +36,16 @@ describe('createRegistrationSubmitter (endpoint selection)', () => {
     expect(submitter).toBeInstanceOf(HttpSubmitter);
   });
 
-  it('returns a PlaceholderSubmitter when the endpoint is undefined', () => {
-    const submitter = createRegistrationSubmitter(undefined);
-    expect(submitter).toBeInstanceOf(PlaceholderSubmitter);
+  it('falls back to VITE_REGISTRATION_ENDPOINT when called with no argument', () => {
+    // With no explicit endpoint, the default parameter resolves to the
+    // build-time env var. The concrete submitter therefore depends on whether
+    // that var is configured — assert against it rather than a fixed class so
+    // the test holds in both configured and unconfigured environments.
+    const expected =
+      VITE_REGISTRATION_ENDPOINT && VITE_REGISTRATION_ENDPOINT.trim().length > 0
+        ? HttpSubmitter
+        : PlaceholderSubmitter;
+    expect(createRegistrationSubmitter()).toBeInstanceOf(expected);
   });
 
   it('returns a PlaceholderSubmitter when the endpoint is an empty/whitespace string', () => {
