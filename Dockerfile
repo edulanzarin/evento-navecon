@@ -8,10 +8,11 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-# Vite inlines VITE_* at build time. The SPA and API share an origin, so the
-# registration endpoint is the relative /api/register.
-ARG VITE_REGISTRATION_ENDPOINT=/api/register
-ENV VITE_REGISTRATION_ENDPOINT=$VITE_REGISTRATION_ENDPOINT
+# Vite inlines the base path at build time. Pass APP_BASE_PATH to serve under a
+# subpath (e.g. /imersao/); assets, the registration endpoint and the payment
+# return route all derive from it. Defaults to the domain root.
+ARG APP_BASE_PATH=/
+ENV APP_BASE_PATH=$APP_BASE_PATH
 RUN npm run build
 
 # ── Runtime stage: production deps + Node server that serves the SPA + API ─

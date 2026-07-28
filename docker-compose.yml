@@ -30,6 +30,8 @@ services:
     build:
       context: .
       target: runtime
+      args:
+        APP_BASE_PATH: ${APP_BASE_PATH:-/}
     container_name: evento-navecon-migrate
     command: ["npx", "tsx", "server/migrate.ts"]
     environment:
@@ -49,6 +51,8 @@ services:
     build:
       context: .
       target: runtime
+      args:
+        APP_BASE_PATH: ${APP_BASE_PATH:-/}
     container_name: evento-navecon-app
     env_file: .env
     environment:

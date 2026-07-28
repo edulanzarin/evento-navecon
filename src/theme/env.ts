@@ -7,17 +7,32 @@
  * - 4.5: IF the event time of day has not been defined, compute remaining time using
  *        the start of day (00:00:00) on 16 September 2026 in Brasília time (UTC−03:00).
  *
- * The registration endpoint (Req 10.2 / 10.7, wired by the submitter) is read from
- * the build-time environment variable `VITE_REGISTRATION_ENDPOINT`, which may be
- * undefined (a placeholder submitter is used in that case).
+ * The registration endpoint (Req 10.2 / 10.7, wired by the submitter) defaults to
+ * a base-relative `…/api/register`, so it follows the app's base path and a
+ * subpath deploy (e.g. `/imersao/api/register`) hits the same origin with no
+ * extra config. An explicit `VITE_REGISTRATION_ENDPOINT` overrides the default.
  */
 
 /**
- * Optional registration submit endpoint. `undefined` when unset, in which case
- * the placeholder submitter is selected downstream.
+ * Base-relative default registration endpoint. `BASE_URL` is `/` at the domain
+ * root and `/imersao/` under a subpath, yielding `/api/register` or
+ * `/imersao/api/register` respectively.
  */
-export const VITE_REGISTRATION_ENDPOINT: string | undefined =
-  import.meta.env.VITE_REGISTRATION_ENDPOINT;
+function defaultRegistrationEndpoint(): string {
+  const base = import.meta.env.BASE_URL.replace(/\/+$/, "");
+  return `${base}/api/register`;
+}
+
+const explicitEndpoint = import.meta.env.VITE_REGISTRATION_ENDPOINT?.trim();
+
+/**
+ * Registration submit endpoint. An explicit, non-empty `VITE_REGISTRATION_ENDPOINT`
+ * wins; otherwise it derives from the app's base path (see above).
+ */
+export const VITE_REGISTRATION_ENDPOINT: string =
+  explicitEndpoint && explicitEndpoint.length > 0
+    ? explicitEndpoint
+    : defaultRegistrationEndpoint();
 
 /**
  * Canonical ISO-8601 start instant of the event, expressed in Brasília time
