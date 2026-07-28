@@ -149,7 +149,7 @@ export const eventContent: EventContent = {
     },
   ],
   contacts: [
-    { kind: "phone", label: "(47) 3319-0420", href: "tel:+554733190420" },
+    { kind: "email", label: "mkt@navecon.net.br", href: "mailto:mkt@navecon.net.br" },
     {
       kind: "instagram",
       label: "@naveconcontabilidade",
