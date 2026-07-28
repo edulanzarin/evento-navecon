@@ -30,7 +30,8 @@ Preencha o `.env` (ele **nunca** vai pro git). Valores que importam:
 | Variável | O que é |
 |---|---|
 | `POSTGRES_PASSWORD` | senha forte do banco |
-| `PUBLIC_BASE_URL` | URL pública do site (produção). Ex.: `https://imersao.navecon.com.br`. Usada nos `back_urls` e no webhook do MP. |
+| `PUBLIC_BASE_URL` | URL pública do site (produção). Ex.: `https://navecon.net.br/imersao`. Usada nos `back_urls` e no webhook do MP. |
+| `APP_BASE_PATH` | caminho base do **build** do frontend. `/` = raiz do domínio; `/imersao/` pra subcaminho (ver [Deploy sob subcaminho](#deploy-sob-subcaminho-naveconnetbrimersao)). |
 | `MP_ACCESS_TOKEN` | **secreto** — access token de produção do Mercado Pago |
 | `MP_PUBLIC_KEY` | public key (não usada no Checkout Pro por redirect; fica de reserva) |
 | `TICKET_PRICE_CENTS` | preço em centavos (`189900` = R$ 1.899,00) |
@@ -74,6 +75,111 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 O Caddy emite e renova o certificado sozinho e faz proxy pra `app:3000`.
 
+## Deploy sob subcaminho (navecon.net.br/imersao)
+
+Cenário do TI: já existe o site em `navecon.net.br` (servido por outro servidor
+web). A imersão entra num **subcaminho** `/imersao`, atrás desse mesmo servidor.
+
+**Como funciona:** o app sobe **só em loopback** (`127.0.0.1:4099`, como sempre)
+e o servidor web do TI faz **proxy reverso** de `/imersao/` pra ele, **removendo
+o prefixo** antes de repassar. Assim o Express continua montado na raiz (`/`,
+`/api`) sem nenhuma mudança no backend — só o frontend precisa saber do `/imersao`,
+e isso já vem do `APP_BASE_PATH` (assets, endpoint `/api/register` e a página de
+retorno derivam dele automaticamente).
+
+**1. No `.env` do servidor:**
+
+```bash
+APP_BASE_PATH=/imersao/                        # caminho base do BUILD (com as duas barras)
+PUBLIC_BASE_URL=https://navecon.net.br/imersao # back_urls + webhook do MP
+# + os segredos: MP_ACCESS_TOKEN, MP_PUBLIC_KEY, SMTP_USER/SMTP_PASS, POSTGRES_PASSWORD…
+```
+
+> `APP_BASE_PATH` é lido no **build** (o compose o passa como build-arg). Se
+> mudar, precisa **rebuildar** (`--build`). Se deixar vazio, o build deriva o
+> caminho a partir de `PUBLIC_BASE_URL` — mas prefira deixar explícito.
+
+**2. Subir só o app + banco** (sem o Caddy deste repo — o TI já tem servidor web):
+
+```bash
+docker compose up -d --build
+# app em 127.0.0.1:4099, banco em 127.0.0.1:5099 (ambos só loopback)
+```
+
+**3. No servidor web do TI (exemplo nginx)** — rota `/imersao` com **strip** do prefixo:
+
+```nginx
+# /imersao (sem barra) → /imersao/
+location = /imersao { return 308 /imersao/; }
+
+# a BARRA FINAL em proxy_pass é o que REMOVE o /imersao/ antes de repassar
+location /imersao/ {
+    proxy_pass http://127.0.0.1:4099/;
+    proxy_set_header Host              $host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+- A **barra final** em `proxy_pass http://127.0.0.1:4099/;` faz o strip:
+  `/imersao/api/register` chega no app como `/api/register`.
+- Os `X-Forwarded-*` são necessários — o app roda com `trust proxy` (IP real no
+  rate limit e esquema `https` corretos).
+- Apache equivale a `ProxyPass /imersao/ http://127.0.0.1:4099/` +
+  `ProxyPassReverse /imersao/ http://127.0.0.1:4099/` e
+  `RequestHeader set X-Forwarded-Proto https`.
+
+**4. No painel do Mercado Pago:** o webhook passa a ser
+`https://navecon.net.br/imersao/api/mp/webhook` (o app monta sozinho a partir do
+`PUBLIC_BASE_URL`).
+
+**Checklist pós-deploy:**
+
+- `https://navecon.net.br/imersao/` abre a landing (assets vêm de `/imersao/assets/...`).
+- `https://navecon.net.br/imersao/api/health` responde `{"ok":true,...}`.
+- Uma inscrição vai pro checkout do MP e volta pra `/imersao/pagamento/...`.
+
+## Testar o pagamento sem gastar (modo de teste do MP)
+
+O `MP_ACCESS_TOKEN` atual é de **produção** — cada inscrição cobra de verdade
+(o checkout já foi validado assim). Pra exercitar o fluxo inteiro (checkout →
+aprovação → e-mail → status `paid`) **sem dinheiro real**, use o **modo de teste**
+do Mercado Pago:
+
+1. No painel do MP → **Suas integrações → [sua aplicação] → Contas de teste**:
+   crie duas contas de teste (uma **vendedora** e uma **compradora**).
+2. Faça login com a conta **vendedora** de teste e copie o **access token de
+   teste** dela (começa com `TEST-`). Coloque em `MP_ACCESS_TOKEN` no `.env` e
+   **reinicie o backend**. (Guarde o token de produção pra depois.)
+3. Rode a inscrição normal e, no checkout, pague com um **cartão de teste** do MP
+   — nada real é movimentado. O **resultado é escolhido pelo NOME do titular**:
+
+   | Nome do titular | Resultado |
+   |---|---|
+   | `APRO` | pagamento aprovado |
+   | `CONT` | pagamento pendente |
+   | `OTHE` | recusado (erro geral) |
+
+   Cartões de teste (validade qualquer futura, ex. `11/30`; CPF `12345678909`):
+
+   | Bandeira | Número | CVV |
+   |---|---|---|
+   | Mastercard | `5031 4332 1540 6351` | `123` |
+   | Visa | `4235 6477 2802 5682` | `123` |
+
+   - **Pix de teste:** o MP gera um pix simulado; o **poller** concilia em alguns
+     minutos (ou o webhook, se houver URL pública). É o caminho pra validar o
+     "pago depois".
+   - Os números/nomes de teste podem mudar — confira a lista atual em
+     **Mercado Pago → Documentação → Cartões de teste**.
+4. Terminado o teste, volte o `MP_ACCESS_TOKEN` pro token de **produção** e
+   reinicie o backend.
+
+> Alternativa "fumaça" com dinheiro real mínimo: baixar `TICKET_PRICE_CENTS=100`
+> (R$ 1,00) temporariamente, pagar com cartão real e estornar no painel. O modo
+> de teste acima é preferível (não move dinheiro).
+
 ## Segurança
 
 - **Segredos** só no `.env` (fora do git e fora da imagem Docker). Rotacione se vazarem.
@@ -94,14 +200,24 @@ O Caddy emite e renova o certificado sozinho e faz proxy pra `app:3000`.
 
 ## Desenvolvimento local (sem Docker)
 
+O `npm run dev` sobe **só o SPA** (Vite, porta 5173). O formulário chama
+`/api/register`, que o Vite **encaminha pro backend na 4099** — logo o backend
+precisa rodar junto, senão dá `ECONNREFUSED`. São **dois processos**:
+
 ```bash
 npm install
-npm run dev            # SPA em modo dev (usa o submitter placeholder, sem backend)
+# Postgres à mão (ex.: o container do compose: docker compose up -d db) e .env preenchido:
+npm run migrate        # aplica as migrations (uma vez)
 
-# Para exercitar a API de verdade, com um Postgres à mão e o .env preenchido:
-npm run migrate        # aplica as migrations
-npm run server:dev     # sobe o backend com reload
+# terminal 1 — backend na 4099 (o PORT já vem do .env, casando com o proxy do Vite)
+npm run server:dev     # backend com reload
+
+# terminal 2 — SPA em http://localhost:5173
+npm run dev
 ```
+
+> O endpoint de inscrição deriva do caminho base (`/api/register` na raiz), então
+> não precisa configurar nada pra bater no backend em dev.
 
 ## Scripts
 
