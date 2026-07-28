@@ -46,11 +46,13 @@ app.use(
       directives: {
         "default-src": ["'self'"],
         "script-src": ["'self'"],
-        "style-src": ["'self'", "'unsafe-inline'"],
+        // Google Fonts: a folha de estilo vem de fonts.googleapis.com e os
+        // arquivos .woff2 de fonts.gstatic.com (Montserrat, a fonte da marca).
+        "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         "img-src": ["'self'", "data:", "blob:", "https://*.openfreemap.org"],
         "connect-src": ["'self'", "https://*.openfreemap.org"],
         "worker-src": ["'self'", "blob:"],
-        "font-src": ["'self'", "data:"],
+        "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
         "media-src": ["'self'"],
         "object-src": ["'none'"],
         "base-uri": ["'self'"],
