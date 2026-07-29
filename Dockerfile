@@ -8,6 +8,16 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+
+# Guarda de Git LFS: as mídias (public/assets/**) são versionadas via LFS. Se o
+# servidor não rodou `git lfs pull` antes do build, elas chegam aqui como
+# ponteiros de texto (~130 bytes começando com "version https://git-lfs..."), e
+# a landing subiria SEM as mídias. Falha alto e explicado em vez de silencioso.
+RUN if head -c 60 public/assets/video/background.mp4 | grep -q "git-lfs"; then \
+      echo "ERRO: mídias em public/assets são ponteiros do Git LFS. Rode 'git lfs pull' no servidor ANTES do build (docker compose ... up -d --build)." >&2; \
+      exit 1; \
+    fi
+
 # Vite inlines the base path at build time. Pass APP_BASE_PATH to serve under a
 # subpath (e.g. /imersao/); assets, the registration endpoint and the payment
 # return route all derive from it. Defaults to the domain root.
