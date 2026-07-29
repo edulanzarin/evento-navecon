@@ -30,8 +30,8 @@ Preencha o `.env` (ele **nunca** vai pro git). Valores que importam:
 | Variável | O que é |
 |---|---|
 | `POSTGRES_PASSWORD` | senha forte do banco |
-| `PUBLIC_BASE_URL` | URL pública do site (produção). Ex.: `https://navecon.net.br/imersao`. Usada nos `back_urls` e no webhook do MP. |
-| `APP_BASE_PATH` | caminho base do **build** do frontend. `/` = raiz do domínio; `/imersao/` pra subcaminho (ver [Deploy sob subcaminho](#deploy-sob-subcaminho-naveconnetbrimersao)). |
+| `PUBLIC_BASE_URL` | URL pública do site (produção). Ex.: `https://imersao.navecon.net.br`. Usada nos `back_urls` e no webhook do MP. |
+| `APP_BASE_PATH` | caminho base do **build** do frontend. `/` = raiz do domínio — é o valor certo pro subdomínio `imersao.navecon.net.br`. |
 | `MP_ACCESS_TOKEN` | **secreto** — access token de produção do Mercado Pago |
 | `MP_PUBLIC_KEY` | public key (não usada no Checkout Pro por redirect; fica de reserva) |
 | `TICKET_PRICE_CENTS` | preço em centavos (`189900` = R$ 1.899,00) |
@@ -59,15 +59,40 @@ docker exec -it evento-navecon-db psql -U evento -d evento_navecon \
   -c "select full_name, email, status, payment_method, installments, paid_at from registrations order by created_at desc;"
 ```
 
-## Produção (domínio + HTTPS)
+## Deploy em `imersao.navecon.net.br` (produção)
 
-O app e o banco publicam portas **só em loopback** — nada fica exposto direto na
-internet. Quem atende o mundo é o **Caddy** (reverse proxy) do
-`docker-compose.prod.yml`, com **HTTPS automático** (Let's Encrypt):
+O site roda num **subdomínio próprio**, `imersao.navecon.net.br`, apontando
+direto pro servidor deste repo. Não há subcaminho nem proxy externo: o app e o
+banco publicam portas **só em loopback** e quem atende o mundo é o **Caddy**
+(reverse proxy) do `docker-compose.prod.yml`, com **HTTPS automático**
+(Let's Encrypt). Como é raiz de subdomínio, `APP_BASE_PATH` fica em `/`.
 
-1. No `.env`: `DOMAIN=seu-dominio.com` e `PUBLIC_BASE_URL=https://seu-dominio.com`.
-2. DNS: um registro **A/AAAA** do domínio apontando pro IP do servidor.
-3. Servidor com as portas **80 e 443** abertas.
+**1. DNS:** um registro **A/AAAA** de `imersao.navecon.net.br` apontando pro IP
+do servidor. Portas **80 e 443** abertas no servidor.
+
+**2. No `.env` do servidor:**
+
+```bash
+DOMAIN=imersao.navecon.net.br
+PUBLIC_BASE_URL=https://imersao.navecon.net.br  # back_urls + webhook do MP
+APP_BASE_PATH=/                                  # raiz do subdomínio
+# + os segredos: MP_ACCESS_TOKEN, MP_PUBLIC_KEY, SMTP_USER/SMTP_PASS, POSTGRES_PASSWORD…
+```
+
+**3. Puxar as mídias do Git LFS ANTES de buildar.** Os vídeos e imagens
+(`public/assets/**` — `.mp4/.png/.jpg/.jpeg`) são versionados via **Git LFS**
+(ver `.gitattributes`). Num `git clone`/`git pull` sem LFS eles vêm como
+**ponteiros de ~130 bytes**, e o `Dockerfile` (`COPY . .`) leva esses ponteiros
+pra imagem — resultado: **a landing sobe mas as mídias não carregam**. No
+servidor, uma vez:
+
+```bash
+git lfs install     # habilita o LFS pra este usuário/repo (idempotente)
+git lfs pull         # baixa os binários reais das mídias
+# confirme: du -h public/assets/video/background.mp4  → deve dar alguns MB, não ~130 bytes
+```
+
+**4. Subir com o Caddy:**
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
@@ -75,70 +100,20 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 O Caddy emite e renova o certificado sozinho e faz proxy pra `app:3000`.
 
-## Deploy sob subcaminho (navecon.net.br/imersao)
-
-Cenário do TI: já existe o site em `navecon.net.br` (servido por outro servidor
-web). A imersão entra num **subcaminho** `/imersao`, atrás desse mesmo servidor.
-
-**Como funciona:** o app sobe **só em loopback** (`127.0.0.1:4099`, como sempre)
-e o servidor web do TI faz **proxy reverso** de `/imersao/` pra ele, **removendo
-o prefixo** antes de repassar. Assim o Express continua montado na raiz (`/`,
-`/api`) sem nenhuma mudança no backend — só o frontend precisa saber do `/imersao`,
-e isso já vem do `APP_BASE_PATH` (assets, endpoint `/api/register` e a página de
-retorno derivam dele automaticamente).
-
-**1. No `.env` do servidor:**
-
-```bash
-APP_BASE_PATH=/imersao/                        # caminho base do BUILD (com as duas barras)
-PUBLIC_BASE_URL=https://navecon.net.br/imersao # back_urls + webhook do MP
-# + os segredos: MP_ACCESS_TOKEN, MP_PUBLIC_KEY, SMTP_USER/SMTP_PASS, POSTGRES_PASSWORD…
-```
-
-> `APP_BASE_PATH` é lido no **build** (o compose o passa como build-arg). Se
-> mudar, precisa **rebuildar** (`--build`). Se deixar vazio, o build deriva o
-> caminho a partir de `PUBLIC_BASE_URL` — mas prefira deixar explícito.
-
-**2. Subir só o app + banco** (sem o Caddy deste repo — o TI já tem servidor web):
-
-```bash
-docker compose up -d --build
-# app em 127.0.0.1:4099, banco em 127.0.0.1:5099 (ambos só loopback)
-```
-
-**3. No servidor web do TI (exemplo nginx)** — rota `/imersao` com **strip** do prefixo:
-
-```nginx
-# /imersao (sem barra) → /imersao/
-location = /imersao { return 308 /imersao/; }
-
-# a BARRA FINAL em proxy_pass é o que REMOVE o /imersao/ antes de repassar
-location /imersao/ {
-    proxy_pass http://127.0.0.1:4099/;
-    proxy_set_header Host              $host;
-    proxy_set_header X-Real-IP         $remote_addr;
-    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}
-```
-
-- A **barra final** em `proxy_pass http://127.0.0.1:4099/;` faz o strip:
-  `/imersao/api/register` chega no app como `/api/register`.
-- Os `X-Forwarded-*` são necessários — o app roda com `trust proxy` (IP real no
-  rate limit e esquema `https` corretos).
-- Apache equivale a `ProxyPass /imersao/ http://127.0.0.1:4099/` +
-  `ProxyPassReverse /imersao/ http://127.0.0.1:4099/` e
-  `RequestHeader set X-Forwarded-Proto https`.
-
-**4. No painel do Mercado Pago:** o webhook passa a ser
-`https://navecon.net.br/imersao/api/mp/webhook` (o app monta sozinho a partir do
+**5. No painel do Mercado Pago:** o webhook é
+`https://imersao.navecon.net.br/api/mp/webhook` (o app monta sozinho a partir do
 `PUBLIC_BASE_URL`).
 
 **Checklist pós-deploy:**
 
-- `https://navecon.net.br/imersao/` abre a landing (assets vêm de `/imersao/assets/...`).
-- `https://navecon.net.br/imersao/api/health` responde `{"ok":true,...}`.
-- Uma inscrição vai pro checkout do MP e volta pra `/imersao/pagamento/...`.
+- `https://imersao.navecon.net.br/` abre a landing **com as mídias** (vídeos e
+  imagens; assets vêm de `/assets/...`).
+- `https://imersao.navecon.net.br/api/health` responde `{"ok":true,...}`.
+- Uma inscrição vai pro checkout do MP e volta pra `/pagamento/...`.
+
+> **Mídias sumiram depois de um deploy?** É quase sempre o LFS não puxado (passo
+> 3). Refaça `git lfs pull` e **rebuilde** (`--build`) — puxar o LFS sem
+> rebuildar não adianta, porque as mídias entram na imagem no `COPY . .`.
 
 ## Testar o pagamento sem gastar (modo de teste do MP)
 
