@@ -27,11 +27,21 @@ import {
   setSessionCookie,
 } from "../admin/auth";
 import {
+  couponsPage,
+  couponUsesPage,
   dashboardPage,
   loginPage,
   methodLabel,
   type Summary,
 } from "../admin/html";
+import {
+  couponUses,
+  createCoupon,
+  deleteCoupon,
+  listCoupons,
+  normalizeCode,
+  setCouponActive,
+} from "../coupons";
 
 export const adminRouter = Router();
 
@@ -258,6 +268,66 @@ adminRouter.post("/registrations/:id/resend-link", async (req, res) => {
   } catch (err) {
     console.error("[admin] resend-link falhou:", err);
     res.redirect("/admin?flash=action");
+  }
+});
+
+// ── Cupons ───────────────────────────────────────────────────────────────────
+adminRouter.get("/coupons", async (req, res) => {
+  const flash = typeof req.query.flash === "string" ? req.query.flash : undefined;
+  try {
+    res.type("html").send(couponsPage(await listCoupons(), flash));
+  } catch (err) {
+    console.error("[admin] lista de cupons falhou:", err);
+    res.status(500).send("Erro ao carregar os cupons.");
+  }
+});
+
+adminRouter.post("/coupons", async (req, res) => {
+  const code = String(req.body?.code ?? "");
+  const maxUses = Number.parseInt(String(req.body?.max_uses ?? ""), 10);
+  const note = String(req.body?.note ?? "");
+  try {
+    const result = await createCoupon(code, maxUses, note);
+    res.redirect(`/admin/coupons?flash=${result === "ok" ? "created" : result}`);
+  } catch (err) {
+    console.error("[admin] criar cupom falhou:", err);
+    res.redirect("/admin/coupons?flash=invalid");
+  }
+});
+
+adminRouter.get("/coupons/:code", async (req, res) => {
+  const code = normalizeCode(req.params.code);
+  try {
+    res.type("html").send(couponUsesPage(code, await couponUses(code)));
+  } catch (err) {
+    console.error("[admin] usos do cupom falhou:", err);
+    res.status(500).send("Erro ao carregar o cupom.");
+  }
+});
+
+adminRouter.post("/coupons/:code/toggle", async (req, res) => {
+  const code = normalizeCode(req.params.code);
+  try {
+    const { rows } = await query<{ active: boolean }>(
+      `SELECT active FROM coupons WHERE code = $1`,
+      [code],
+    );
+    if (rows.length === 0) return res.redirect("/admin/coupons?flash=invalid");
+    await setCouponActive(code, !rows[0].active);
+    res.redirect("/admin/coupons?flash=updated");
+  } catch (err) {
+    console.error("[admin] toggle cupom falhou:", err);
+    res.redirect("/admin/coupons?flash=invalid");
+  }
+});
+
+adminRouter.post("/coupons/:code/delete", async (req, res) => {
+  try {
+    await deleteCoupon(normalizeCode(req.params.code));
+    res.redirect("/admin/coupons?flash=deleted");
+  } catch (err) {
+    console.error("[admin] excluir cupom falhou:", err);
+    res.redirect("/admin/coupons?flash=invalid");
   }
 });
 

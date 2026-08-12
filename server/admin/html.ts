@@ -5,6 +5,7 @@
  * {@link esc} antes de entrar no HTML — a defesa contra XSS.
  */
 import { formatBRL, type RegistrationRow } from "../types";
+import type { CouponRow, CouponUse } from "../coupons";
 
 /** Escapa texto para inserção segura em HTML. */
 export function esc(value: unknown): string {
@@ -71,7 +72,41 @@ const STYLE = `
   .login input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--line);
     color:var(--fg);border-radius:10px;padding:.6rem .8rem;font:inherit;min-height:44px}
   .login .btn-primary{width:100%;margin-top:1.2rem;min-height:44px}
+  .nav{display:flex;align-items:center;gap:.4rem}
+  .navlink{padding:.5rem .8rem;border-radius:10px;text-decoration:none;color:var(--muted);
+    font-weight:600}
+  .navlink:hover{color:var(--fg)}
+  .navlink--on{color:var(--accent);background:rgba(200,162,60,.12)}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    padding:1.1rem 1.25rem;margin-bottom:1.5rem}
+  .panel h2{margin:0 0 .9rem;font-size:1rem}
+  .cform{display:flex;flex-wrap:wrap;gap:.7rem;align-items:flex-end}
+  .cform .fld{display:flex;flex-direction:column;gap:.3rem}
+  .cform label{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .cform input{background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--fg);
+    border-radius:10px;padding:.55rem .7rem;font:inherit;min-height:42px}
+  .cform input[name=code]{text-transform:uppercase}
+  .uses{font-variant-numeric:tabular-nums}
+  .bar{height:6px;border-radius:999px;background:rgba(255,255,255,.08);margin-top:.3rem;overflow:hidden}
+  .bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--warn),var(--accent2))}
+  .tag{display:inline-block;padding:.15rem .5rem;border-radius:999px;font-size:.72rem;font-weight:700}
+  .tag-on{color:var(--ok);background:rgba(52,211,154,.12);border:1px solid rgba(52,211,154,.4)}
+  .tag-off{color:var(--muted);background:rgba(168,182,210,.1);border:1px solid var(--line)}
 `;
+
+/** Barra superior com navegação entre Inscrições e Cupons. */
+function topbar(active: "inscricoes" | "cupons"): string {
+  const link = (href: string, id: string, label: string): string =>
+    `<a class="navlink${active === id ? " navlink--on" : ""}" href="${href}">${label}</a>`;
+  return `<div class="topbar">
+    <div class="brand">Imersão <span>Navecon</span> · Painel</div>
+    <nav class="nav">
+      ${link("/admin", "inscricoes", "Inscrições")}
+      ${link("/admin/coupons", "cupons", "Cupons")}
+      <form method="post" action="/admin/logout"><button class="btn" type="submit">Sair</button></form>
+    </nav>
+  </div>`;
+}
 
 function layout(title: string, body: string): string {
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
@@ -256,13 +291,110 @@ export function dashboardPage(data: DashboardData): string {
   return layout(
     "Painel — Imersão Navecon",
     `<div class="wrap">
-      <div class="topbar">
-        <div class="brand">Imersão <span>Navecon</span> · Painel</div>
-        <form method="post" action="/admin/logout"><button class="btn" type="submit">Sair</button></form>
-      </div>
+      ${topbar("inscricoes")}
       ${flashHtml}
       ${cards}
       ${filters}
+      ${table}
+    </div>`,
+  );
+}
+
+// ── Cupons ───────────────────────────────────────────────────────────────────
+
+const COUPON_FLASH: Record<string, { msg?: string; err?: string }> = {
+  created: { msg: "Cupom criado." },
+  exists: { err: "Já existe um cupom com esse código." },
+  invalid: { err: "Código ou nº de usos inválido." },
+  updated: { msg: "Cupom atualizado." },
+  deleted: { msg: "Cupom excluído." },
+};
+
+function couponRow(c: CouponRow): string {
+  const pct = c.max_uses > 0 ? Math.min(100, Math.round((c.uses / c.max_uses) * 100)) : 0;
+  const status = c.active
+    ? '<span class="tag tag-on">Ativo</span>'
+    : '<span class="tag tag-off">Inativo</span>';
+  const toggleLabel = c.active ? "Desativar" : "Ativar";
+  return `<tr>
+    <td><a href="/admin/coupons/${encodeURIComponent(c.code)}"><strong>${esc(c.code)}</strong></a></td>
+    <td>Cortesia (100%)</td>
+    <td class="uses">${c.uses}/${c.max_uses}<div class="bar"><i style="width:${pct}%"></i></div></td>
+    <td>${status}</td>
+    <td>${c.note ? esc(c.note) : '<span class="muted">—</span>'}</td>
+    <td><div class="actions">
+      <a class="btn btn-sm" href="/admin/coupons/${encodeURIComponent(c.code)}">Quem usou</a>
+      <form method="post" action="/admin/coupons/${encodeURIComponent(c.code)}/toggle"><button class="btn btn-sm" type="submit">${toggleLabel}</button></form>
+      <form method="post" action="/admin/coupons/${encodeURIComponent(c.code)}/delete"><button class="btn btn-sm" type="submit">Excluir</button></form>
+    </div></td>
+  </tr>`;
+}
+
+/** Página de cupons: formulário de criação + tabela com uso e ações. */
+export function couponsPage(
+  coupons: CouponRow[],
+  flashKey?: string,
+): string {
+  const flash = flashKey ? COUPON_FLASH[flashKey] : undefined;
+  const flashHtml = flash?.msg
+    ? `<p class="flash flash-ok">${esc(flash.msg)}</p>`
+    : flash?.err
+      ? `<p class="flash flash-err">${esc(flash.err)}</p>`
+      : "";
+
+  const form = `<div class="panel">
+    <h2>Novo cupom de cortesia</h2>
+    <form class="cform" method="post" action="/admin/coupons">
+      <div class="fld"><label for="c-code">Código</label>
+        <input id="c-code" name="code" placeholder="NAVECON100" autocapitalize="characters" required></div>
+      <div class="fld"><label for="c-max">Usos</label>
+        <input id="c-max" name="max_uses" type="number" min="1" max="100000" value="1" required style="width:90px"></div>
+      <div class="fld" style="flex:1;min-width:180px"><label for="c-note">Nota (pra quem)</label>
+        <input id="c-note" name="note" placeholder="Ex.: Convidados VIP" maxlength="120"></div>
+      <button class="btn btn-primary" type="submit">Criar cupom</button>
+    </form>
+  </div>`;
+
+  const table =
+    coupons.length === 0
+      ? '<div class="empty">Nenhum cupom ainda. Crie o primeiro acima.</div>'
+      : `<div class="table-scroll"><table>
+          <thead><tr>
+            <th>Código</th><th>Desconto</th><th>Usos</th><th>Status</th><th>Nota</th><th>Ações</th>
+          </tr></thead>
+          <tbody>${coupons.map(couponRow).join("")}</tbody>
+        </table></div>`;
+
+  return layout(
+    "Cupons — Imersão Navecon",
+    `<div class="wrap">${topbar("cupons")}${flashHtml}${form}${table}</div>`,
+  );
+}
+
+/** Página de detalhe de um cupom: quem já o usou. */
+export function couponUsesPage(code: string, uses: CouponUse[]): string {
+  const rows = uses
+    .map(
+      (u) => `<tr>
+        <td>${esc(formatDate(u.created_at))}</td>
+        <td>${esc(u.full_name)}</td>
+        <td>${esc(u.email)}<div class="sub">${esc(u.phone)}</div></td>
+        <td>${statusPill(u.status)}</td>
+      </tr>`,
+    )
+    .join("");
+  const table =
+    uses.length === 0
+      ? '<div class="empty">Este cupom ainda não foi usado.</div>'
+      : `<div class="table-scroll"><table>
+          <thead><tr><th>Data</th><th>Nome</th><th>Contato</th><th>Status</th></tr></thead>
+          <tbody>${rows}</tbody></table></div>`;
+
+  return layout(
+    `Cupom ${code} — Imersão Navecon`,
+    `<div class="wrap">${topbar("cupons")}
+      <p style="margin:.2rem 0 1.2rem"><a href="/admin/coupons">← Voltar aos cupons</a></p>
+      <h1 style="font-size:1.3rem;margin:0 0 1rem">Quem usou <span style="color:var(--accent)">${esc(code)}</span> — ${uses.length}</h1>
       ${table}
     </div>`,
   );

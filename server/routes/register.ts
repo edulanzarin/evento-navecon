@@ -87,20 +87,18 @@ registerRouter.post("/register", async (req, res) => {
       return res.status(500).json({ error: "db" });
     }
 
-    const redeemed = await redeemCoupon(couponCode, registrationId).catch(
-      (err) => {
-        console.error("[register] resgate de cupom falhou:", err);
-        return false;
-      },
-    );
+    const redeemed = await redeemCoupon(couponCode).catch((err) => {
+      console.error("[register] resgate de cupom falhou:", err);
+      return false;
+    });
     if (!redeemed) {
-      // Cupom inexistente ou já usado: remove a inscrição recém-criada e avisa.
+      // Cupom inexistente, inativo ou esgotado: remove a inscrição órfã e avisa.
       await query(`DELETE FROM registrations WHERE id = $1`, [
         registrationId,
       ]).catch(() => {});
       return res.status(400).json({
         error: "validation",
-        fields: { coupon: "Cupom inválido ou já utilizado." },
+        fields: { coupon: "Cupom inválido ou esgotado." },
       });
     }
 
