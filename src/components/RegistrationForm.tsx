@@ -300,7 +300,6 @@ export function RegistrationForm({
               value={coupon}
               onChange={(e) => setCoupon(e.target.value)}
               maxLength={MAX_LENGTHS.coupon}
-              placeholder="Ex.: NAVECON100"
               autoComplete="off"
               autoCapitalize="characters"
               aria-invalid={errors.coupon ? true : undefined}
