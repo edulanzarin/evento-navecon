@@ -211,6 +211,7 @@ describe("RegistrationForm", () => {
         email: VALID.email,
         phoneDigits: "47999998888",
         company: null,
+        couponCode: null,
       });
       expect(signal).toBeInstanceOf(AbortSignal);
     });
@@ -317,6 +318,56 @@ describe("RegistrationForm", () => {
       expect(getNameInput()).toHaveValue(VALID.name);
       expect(getEmailInput()).toHaveValue(VALID.email);
       expect(getPhoneInput()).toHaveValue(VALID.phone);
+    });
+  });
+
+  describe("courtesy coupon", () => {
+    function getCouponInput(): HTMLInputElement {
+      return screen.getByLabelText(/Cupom/) as HTMLInputElement;
+    }
+    function getCouponSubmitButton(): HTMLButtonElement {
+      return screen.getByRole("button", {
+        name: /(Confirmar inscrição|Ir para o pagamento|Enviando|Redirecionando)/,
+      }) as HTMLButtonElement;
+    }
+
+    it("includes the typed coupon in the submitted payload", async () => {
+      const user = userEvent.setup();
+      const { submitter, submit } = mockSubmitter({ ok: true });
+      render(<RegistrationForm submitter={submitter} />);
+
+      await fillValid(user);
+      await user.type(getCouponInput(), "nave-7k2q");
+      await user.click(getCouponSubmitButton());
+
+      expect(submit).toHaveBeenCalledTimes(1);
+      const [payload] = submit.mock.calls[0];
+      // Validation trims but does not upper-case; the server normalizes the case.
+      expect(payload.couponCode).toBe("nave-7k2q");
+    });
+
+    it("surfaces a server field error on the coupon field and re-enables submit", async () => {
+      const user = userEvent.setup();
+      const { submitter } = mockSubmitter({
+        ok: false,
+        reason: "HTTP 400",
+        fieldErrors: { coupon: "Cupom inválido ou já utilizado." },
+      });
+      render(<RegistrationForm submitter={submitter} />);
+
+      await fillValid(user);
+      await user.type(getCouponInput(), "NAVE-XXXX");
+      await user.click(getCouponSubmitButton());
+
+      // The per-field message shows and no generic error banner appears.
+      const alert = await screen.findByText("Cupom inválido ou já utilizado.");
+      expect(alert).toBeInTheDocument();
+      expect(screen.queryByTestId("registration-error")).not.toBeInTheDocument();
+
+      // Submit re-enabled and all values (including the coupon) retained.
+      expect(getCouponSubmitButton()).not.toBeDisabled();
+      expect(getCouponInput()).toHaveValue("NAVE-XXXX");
+      expect(getNameInput()).toHaveValue(VALID.name);
     });
   });
 });

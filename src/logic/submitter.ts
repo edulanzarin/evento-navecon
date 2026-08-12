@@ -34,7 +34,7 @@ export const SUBMIT_TIMEOUT_MS = 30_000;
  */
 export type SubmitResult =
   | { ok: true; redirectUrl?: string }
-  | { ok: false; reason: string };
+  | { ok: false; reason: string; fieldErrors?: Record<string, string> };
 
 /**
  * Abstraction over the registration destination. Implementations MUST resolve
@@ -120,7 +120,19 @@ export class HttpSubmitter implements RegistrationSubmitter {
         return redirectUrl ? { ok: true, redirectUrl } : { ok: true };
       }
 
-      return { ok: false, reason: `HTTP ${res.status}` };
+      // On a validation rejection the backend returns `{ fields: {...} }` with
+      // per-field messages (e.g. an invalid coupon). Surface them so the form
+      // can flag the exact field; a non-JSON body just leaves them undefined.
+      let fieldErrors: Record<string, string> | undefined;
+      try {
+        const data = (await res.json()) as { fields?: unknown };
+        if (data?.fields && typeof data.fields === "object") {
+          fieldErrors = data.fields as Record<string, string>;
+        }
+      } catch {
+        /* no JSON body */
+      }
+      return { ok: false, reason: `HTTP ${res.status}`, fieldErrors };
     } catch (error) {
       return { ok: false, reason: describeError(error) };
     } finally {

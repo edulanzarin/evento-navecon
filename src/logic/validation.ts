@@ -15,6 +15,7 @@ export interface RegistrationInput {
   email: string; // required, ≤254
   phone: string; // required, raw input; normalized to digits for validation; ≤11 digits
   company: string; // optional, ≤100
+  couponCode?: string; // optional courtesy coupon; server is the source of truth
 }
 
 /** Per-field validation messages (pt-BR). A field key is present only when invalid. */
@@ -22,6 +23,7 @@ export interface FieldErrors {
   fullName?: string;
   email?: string;
   phone?: string;
+  coupon?: string; // only surfaced from a server rejection (invalid/used coupon)
 }
 
 /** Normalized, validated payload ready to be submitted. */
@@ -30,6 +32,7 @@ export interface RegistrationPayload {
   email: string;
   phoneDigits: string; // normalized digits only
   company: string | null;
+  couponCode?: string | null; // trimmed; null when the visitor left it empty
 }
 
 /** Discriminated result of validating a {@link RegistrationInput}. */
@@ -118,11 +121,13 @@ export function validateRegistration(input: RegistrationInput): ValidationResult
   }
 
   const trimmedCompany = input.company.trim();
+  const trimmedCoupon = (input.couponCode ?? '').trim();
   const value: RegistrationPayload = {
     fullName: input.fullName.trim(),
     email: input.email.trim(),
     phoneDigits: input.phone.replace(/\D/g, ''),
     company: trimmedCompany.length > 0 ? trimmedCompany : null,
+    couponCode: trimmedCoupon.length > 0 ? trimmedCoupon : null,
   };
 
   return { valid: true, value };

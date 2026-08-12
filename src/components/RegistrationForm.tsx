@@ -60,6 +60,7 @@ const MAX_LENGTHS = {
   // 10–11 digit rule. 15 leaves room for "(11) 91234-5678" style input.
   phone: 15,
   company: 100,
+  coupon: 40,
 } as const;
 
 export interface RegistrationFormProps {
@@ -107,6 +108,7 @@ export function RegistrationForm({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [company, setCompany] = useState("");
+  const [coupon, setCoupon] = useState("");
 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [state, setState] = useState<SubmitState>("idle");
@@ -122,7 +124,7 @@ export function RegistrationForm({
       return;
     }
 
-    const input: RegistrationInput = { fullName, email, phone, company };
+    const input: RegistrationInput = { fullName, email, phone, company, couponCode: coupon };
     const result = validateRegistration(input);
 
     if (!result.valid) {
@@ -146,15 +148,29 @@ export function RegistrationForm({
         result.value,
         controller.signal,
       );
-      if (outcome.ok && outcome.redirectUrl) {
-        // Registration saved → hand off to the payment checkout. Keep controls
-        // locked ("redirecting") while the browser navigates away.
-        setState("redirecting");
-        redirect(outcome.redirectUrl);
+      if (outcome.ok) {
+        if (outcome.redirectUrl) {
+          // Registration saved → hand off to the payment checkout (or, for a
+          // courtesy coupon, straight to the success page). Keep controls locked
+          // while the browser navigates away.
+          setState("redirecting");
+          redirect(outcome.redirectUrl);
+        } else {
+          // Success without a redirect URL (dev/placeholder) → confirmation.
+          setState("success");
+        }
+      } else if (
+        outcome.fieldErrors &&
+        Object.keys(outcome.fieldErrors).length > 0
+      ) {
+        // Server validation rejection (e.g. an invalid/used coupon): show the
+        // message on the field and return to idle so the visitor can fix it.
+        setErrors(outcome.fieldErrors as FieldErrors);
+        setState("idle");
       } else {
-        // Success without a checkout URL (dev/placeholder) → confirmation;
-        // non-OK → error, re-enabling submit and retaining values (Req 10.2, 10.7).
-        setState(outcome.ok ? "success" : "error");
+        // Other failure → generic error, re-enabling submit and retaining
+        // values (Req 10.7).
+        setState("error");
       }
     } catch {
       // Rejection/abort/timeout → error, re-enable submit, retain values
@@ -273,12 +289,39 @@ export function RegistrationForm({
             />
           </div>
 
+          {/* Coupon — optional courtesy code. A valid 100% coupon skips payment;
+              the server validates it and returns a per-field message if invalid. */}
+          <div className="field">
+            <label htmlFor="reg-coupon">Cupom de cortesia (opcional)</label>
+            <input
+              id="reg-coupon"
+              name="coupon"
+              type="text"
+              value={coupon}
+              onChange={(e) => setCoupon(e.target.value)}
+              maxLength={MAX_LENGTHS.coupon}
+              placeholder="Ex.: NAVE-7K2Q"
+              autoComplete="off"
+              autoCapitalize="characters"
+              aria-invalid={errors.coupon ? true : undefined}
+              aria-describedby={errors.coupon ? "reg-coupon-error" : undefined}
+              disabled={busy}
+            />
+            {errors.coupon && (
+              <span id="reg-coupon-error" role="alert" className="field-error">
+                {errors.coupon}
+              </span>
+            )}
+          </div>
+
           <button type="submit" disabled={busy} className="btn btn-primary">
             {state === "submitting"
               ? "Enviando…"
               : state === "redirecting"
                 ? "Redirecionando…"
-                : "Ir para o pagamento"}
+                : coupon.trim()
+                  ? "Confirmar inscrição"
+                  : "Ir para o pagamento"}
           </button>
 
           {/* Async outcome messages (Req 10.2, 10.7). */}
