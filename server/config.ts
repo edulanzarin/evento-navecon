@@ -44,8 +44,22 @@ export const config = {
     notify: str("NOTIFY_EMAIL", smtpUser),
   },
 
+  // Painel /admin. Opcional: sem ADMIN_USER/ADMIN_PASSWORD o painel fica off (404).
+  admin: {
+    user: str("ADMIN_USER"),
+    password: str("ADMIN_PASSWORD"),
+    // Segredo para assinar o cookie de sessão. Ausente → derivado das credenciais
+    // (trocar a senha invalida sessões abertas, o que é aceitável aqui).
+    sessionSecret: str("ADMIN_SESSION_SECRET"),
+  },
+
   pollIntervalMs: int("POLL_INTERVAL_MS", 120_000),
 } as const;
+
+/** O painel /admin só liga quando usuário e senha estão configurados. */
+export function isAdminEnabled(): boolean {
+  return config.admin.user !== "" && config.admin.password !== "";
+}
 
 /**
  * Falha cedo e claro se o app subir sem os segredos que ele realmente usa

@@ -13,6 +13,8 @@ export interface RegistrationRow {
   installments: number | null;
   paid_amount_cents: number | null;
   notified_paid: boolean;
+  coupon_code: string | null;
+  created_at: string;
 }
 
 /** Formata centavos como "R$ 1.899,00". */

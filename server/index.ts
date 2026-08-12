@@ -24,6 +24,7 @@ import { assertAppConfig, config } from "./config";
 import { registerRouter } from "./routes/register";
 import { webhookRouter } from "./routes/webhook";
 import { paymentRouter } from "./routes/payment";
+import { adminRouter } from "./routes/admin";
 import { startPoller } from "./reconcile";
 
 assertAppConfig();
@@ -86,6 +87,14 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: "rate_limited" },
 });
+// Freia tentativa de força-bruta no login do painel.
+const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: "Muitas tentativas. Tente de novo em alguns minutos.",
+});
 
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, ts: new Date().toISOString() });
@@ -98,6 +107,10 @@ app.use("/api", paymentRouter);
 
 // 404 JSON para rotas de API desconhecidas (não cai no fallback do SPA).
 app.use("/api", (_req, res) => res.status(404).json({ error: "not_found" }));
+
+// Painel /admin (server-rendered) — antes do SPA, senão o fallback engoliria a rota.
+app.use("/admin/login", adminLoginLimiter);
+app.use("/admin", adminRouter);
 
 // SPA estático + fallback para rotas de cliente (tudo que não começa com /api/).
 const distDir = join(dirname(fileURLToPath(import.meta.url)), "..", "dist");

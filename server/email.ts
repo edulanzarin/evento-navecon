@@ -64,11 +64,13 @@ export async function sendPaymentConfirmed(
   const amount = reg.paid_amount_cents ?? reg.amount_cents;
   const method = isCourtesy
     ? "Cortesia (convite)"
-    : reg.payment_method === "pix"
-      ? "Pix"
-      : reg.installments && reg.installments > 1
-        ? `Cartão em ${reg.installments}x`
-        : "Cartão à vista";
+    : reg.payment_method === "manual"
+      ? "Confirmado pela organização"
+      : reg.payment_method === "pix"
+        ? "Pix"
+        : reg.installments && reg.installments > 1
+          ? `Cartão em ${reg.installments}x`
+          : "Cartão à vista";
   const valueLabel = isCourtesy ? "Cortesia (100%)" : formatBRL(amount);
   const intro = isCourtesy
     ? `Olá, ${reg.full_name}! Sua vaga na imersão está garantida como cortesia.`
@@ -91,6 +93,29 @@ export async function sendPaymentConfirmed(
     subject: isCourtesy
       ? "Vaga confirmada — Imersão Navecon"
       : "Pagamento confirmado — Imersão Navecon",
+    html,
+  });
+}
+
+/** Reenvia o link de pagamento para uma inscrição ainda em aberto (ação do painel). */
+export async function sendPaymentLink(
+  reg: Pick<RegistrationRow, "full_name" | "email" | "amount_cents">,
+  checkoutUrl: string,
+): Promise<void> {
+  const html = `
+    <div style="font-family:system-ui,Arial,sans-serif;color:#0f172a">
+      <h2 style="margin:0 0 12px">Seu link de pagamento</h2>
+      <p>Olá, ${reg.full_name}! Segue o link para concluir sua inscrição na imersão (${formatBRL(reg.amount_cents)}):</p>
+      <p style="margin:18px 0">
+        <a href="${checkoutUrl}" style="background:#c8a23c;color:#0a1430;font-weight:700;text-decoration:none;padding:12px 20px;border-radius:10px;display:inline-block">Pagar agora</a>
+      </p>
+      <p style="color:#64748b;font-size:13px;word-break:break-all">Se o botão não abrir, copie e cole: ${checkoutUrl}</p>
+      <p style="margin-top:16px;color:#64748b">Navecon Contabilidade</p>
+    </div>`;
+  await getTransport().sendMail({
+    from: config.smtp.from,
+    to: reg.email,
+    subject: "Seu link de pagamento — Imersão Navecon",
     html,
   });
 }
