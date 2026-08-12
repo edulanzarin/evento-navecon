@@ -13,7 +13,8 @@
     "typecheck:server": "tsc -p tsconfig.server.json --noEmit",
     "server": "tsx server/index.ts",
     "server:dev": "tsx watch server/index.ts",
-    "migrate": "tsx server/migrate.ts"
+    "migrate": "tsx server/migrate.ts",
+    "coupons": "tsx server/coupons-cli.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.7",

@@ -60,19 +60,25 @@ export async function sendPaymentConfirmed(
     "full_name" | "email" | "payment_method" | "installments" | "paid_amount_cents" | "amount_cents"
   >,
 ): Promise<void> {
+  const isCourtesy = reg.payment_method === "cortesia";
   const amount = reg.paid_amount_cents ?? reg.amount_cents;
-  const method =
-    reg.payment_method === "pix"
+  const method = isCourtesy
+    ? "Cortesia (convite)"
+    : reg.payment_method === "pix"
       ? "Pix"
       : reg.installments && reg.installments > 1
         ? `Cartão em ${reg.installments}x`
         : "Cartão à vista";
+  const valueLabel = isCourtesy ? "Cortesia (100%)" : formatBRL(amount);
+  const intro = isCourtesy
+    ? `Olá, ${reg.full_name}! Sua vaga na imersão está garantida como cortesia.`
+    : `Olá, ${reg.full_name}! Recebemos seu pagamento e sua vaga na imersão está garantida.`;
   const html = `
     <div style="font-family:system-ui,Arial,sans-serif;color:#0f172a">
-      <h2 style="margin:0 0 12px">Pagamento confirmado 🎉</h2>
-      <p>Olá, ${reg.full_name}! Recebemos seu pagamento e sua vaga na imersão está garantida.</p>
+      <h2 style="margin:0 0 12px">${isCourtesy ? "Vaga confirmada 🎉" : "Pagamento confirmado 🎉"}</h2>
+      <p>${intro}</p>
       <table style="border-collapse:collapse;margin-top:8px">
-        ${row("Valor", formatBRL(amount))}
+        ${row("Valor", valueLabel)}
         ${row("Forma", method)}
       </table>
       <p style="margin-top:16px">Em breve enviaremos os detalhes do evento. Qualquer dúvida, é só responder este e-mail.</p>
@@ -82,7 +88,9 @@ export async function sendPaymentConfirmed(
     from: config.smtp.from,
     to: reg.email,
     cc: config.smtp.notify,
-    subject: "Pagamento confirmado — Imersão Navecon",
+    subject: isCourtesy
+      ? "Vaga confirmada — Imersão Navecon"
+      : "Pagamento confirmado — Imersão Navecon",
     html,
   });
 }

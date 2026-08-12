@@ -37,10 +37,16 @@ paymentRouter.get("/payment/status", async (req, res) => {
   if (rows.length === 0) return res.status(404).json({ error: "not_found" });
 
   const r = rows[0];
+  const isCourtesy = r.payment_method === "cortesia";
   return res.json({
     status: r.status,
     method: r.payment_method,
     installments: r.installments,
-    amount: formatBRL(r.paid_amount_cents ?? r.amount_cents),
+    amount: isCourtesy ? null : formatBRL(r.paid_amount_cents ?? r.amount_cents),
+    courtesy: isCourtesy,
+    // Dados do ingresso: só o primeiro nome (suficiente para o cartão) e um
+    // localizador curto derivado do id. Nenhum outro dado pessoal sai daqui.
+    name: r.full_name.trim().split(/\s+/)[0] ?? r.full_name,
+    locator: r.id.slice(0, 8).toUpperCase(),
   });
 });
