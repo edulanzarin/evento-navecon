@@ -1,12 +1,17 @@
 /**
- * Cupons de cortesia (100% de desconto) com código escolhido e N usos.
+ * Cupons de desconto com código escolhido, porcentagem e N usos.
+ *
+ * A porcentagem manda no fluxo: 100% é cortesia (dispensa o Mercado Pago, que
+ * não cobra R$ 0) e 1–99% apenas abate o valor do ingresso — o checkout segue
+ * normal, só mais barato.
  *
  * - normalizeCode: deixa o código canônico (trim + MAIÚSCULAS) para bater sem
  *   sensibilidade a caixa.
  * - redeemCoupon: resgate ATÔMICO por limite. O UPDATE só incrementa se o cupom
  *   está ativo E ainda tem uso (`uses < max_uses`); duas pessoas disputando o
  *   último uso competem no banco e só uma leva. É o que garante o limite sem
- *   trava de aplicação nem condição de corrida.
+ *   trava de aplicação nem condição de corrida. Devolve a porcentagem resgatada
+ *   na mesma ida ao banco.
  * - o restante são as operações do painel /admin (criar, listar, resgates,
  *   ativar/desativar, excluir).
  *
@@ -31,43 +36,72 @@ export function isValidCode(raw: string): boolean {
 export interface CouponRow {
   code: string;
   note: string | null;
+  discount_percent: number;
   max_uses: number;
   uses: number;
   active: boolean;
   created_at: string;
 }
 
+/** Um desconto é uma porcentagem inteira de 1 a 100. */
+export function isValidPercent(percent: number): boolean {
+  return Number.isInteger(percent) && percent >= 1 && percent <= 100;
+}
+
 /**
- * Resgata um uso do cupom. Devolve `true` só quando ele existe, está ativo e
- * ainda tinha uso livre — nesse caso o contador sobe em um. Qualquer outra
- * situação (inexistente, inativo, esgotado) devolve `false`.
+ * O que sobra do ingresso depois do desconto, em centavos. 100% zera (cortesia);
+ * o arredondamento é para o centavo mais próximo.
  */
-export async function redeemCoupon(code: string): Promise<boolean> {
-  const { rowCount } = await query(
+export function discountedCents(priceCents: number, percent: number): number {
+  if (percent >= 100) return 0;
+  return Math.max(0, Math.round((priceCents * (100 - percent)) / 100));
+}
+
+/**
+ * Resgata um uso do cupom. Devolve a porcentagem de desconto só quando ele
+ * existe, está ativo e ainda tinha uso livre — nesse caso o contador sobe em um.
+ * Qualquer outra situação (inexistente, inativo, esgotado) devolve `null`.
+ */
+export async function redeemCoupon(code: string): Promise<number | null> {
+  const { rows } = await query<{ discount_percent: number }>(
     `UPDATE coupons SET uses = uses + 1
-      WHERE code = $1 AND active = true AND uses < max_uses`,
+      WHERE code = $1 AND active = true AND uses < max_uses
+      RETURNING discount_percent`,
     [normalizeCode(code)],
   );
-  return (rowCount ?? 0) > 0;
+  return rows.length > 0 ? rows[0].discount_percent : null;
+}
+
+/**
+ * Devolve um uso ao cupom — compensação para quando o resgate deu certo mas a
+ * inscrição não chegou a ser gravada. Nunca deixa o contador abaixo de zero.
+ */
+export async function releaseCoupon(code: string): Promise<void> {
+  await query(
+    `UPDATE coupons SET uses = uses - 1 WHERE code = $1 AND uses > 0`,
+    [normalizeCode(code)],
+  );
 }
 
 // ── Operações do painel /admin ───────────────────────────────────────────────
 
 export type CreateResult = "ok" | "exists" | "invalid";
 
-/** Cria um cupom com código escolhido e limite de usos. */
+/** Cria um cupom com código escolhido, porcentagem de desconto e limite de usos. */
 export async function createCoupon(
   rawCode: string,
   maxUses: number,
+  discountPercent: number,
   note: string | null,
 ): Promise<CreateResult> {
   if (!isValidCode(rawCode)) return "invalid";
   if (!Number.isInteger(maxUses) || maxUses < 1 || maxUses > 100_000)
     return "invalid";
+  if (!isValidPercent(discountPercent)) return "invalid";
   const { rowCount } = await query(
-    `INSERT INTO coupons (code, note, max_uses)
-     VALUES ($1, $2, $3) ON CONFLICT (code) DO NOTHING`,
-    [normalizeCode(rawCode), note?.trim() || null, maxUses],
+    `INSERT INTO coupons (code, note, max_uses, discount_percent)
+     VALUES ($1, $2, $3, $4) ON CONFLICT (code) DO NOTHING`,
+    [normalizeCode(rawCode), note?.trim() || null, maxUses, discountPercent],
   );
   return rowCount ? "ok" : "exists";
 }
@@ -75,7 +109,7 @@ export async function createCoupon(
 /** Todos os cupons, mais recentes primeiro. */
 export async function listCoupons(): Promise<CouponRow[]> {
   const { rows } = await query<CouponRow>(
-    `SELECT code, note, max_uses, uses, active, created_at
+    `SELECT code, note, discount_percent, max_uses, uses, active, created_at
        FROM coupons ORDER BY created_at DESC, code`,
   );
   return rows;

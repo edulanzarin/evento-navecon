@@ -3,15 +3,24 @@
  * cria a cobrança no Mercado Pago e devolve o link de checkout. O aviso por
  * e-mail é best-effort (não segura a resposta).
  *
- * Cortesia: se vier um `couponCode` válido (100% de desconto), o pagamento é
- * dispensado — o Mercado Pago não aceita cobrança de R$ 0. A inscrição já nasce
- * 'paid' com method 'cortesia', o cupom é resgatado (uso único) e a resposta
- * aponta direto para a tela de sucesso, sem checkout.
+ * Cupom: se vier um `couponCode` válido, ele é resgatado ANTES de gravar a
+ * inscrição (resgate atômico; falha na gravação devolve o uso) e a porcentagem
+ * dele define o resto do caminho:
+ *
+ *   - 100% (cortesia) → sem Mercado Pago, que não cobra R$ 0. A inscrição já
+ *     nasce 'paid' com method 'cortesia' e a resposta aponta para a tela de
+ *     sucesso.
+ *   - 1–99%           → checkout normal, só com o valor já abatido.
  */
 import { Router } from "express";
 import { config } from "../config";
 import { query } from "../db";
-import { normalizeCode, redeemCoupon } from "../coupons";
+import {
+  discountedCents,
+  normalizeCode,
+  redeemCoupon,
+  releaseCoupon,
+} from "../coupons";
 import { sendNewRegistrationNotice, sendPaymentConfirmed } from "../email";
 import { createPreference } from "../mercadopago";
 import type { RegistrationRow } from "../types";
@@ -70,41 +79,46 @@ registerRouter.post("/register", async (req, res) => {
   }
   const { fullName, email, phone, company, couponCode } = parsed.value;
 
-  // ── Caminho de cortesia (cupom 100%) ─────────────────────────────────────
-  // Não passa pelo Mercado Pago: cria a inscrição já paga e resgata o cupom de
-  // forma atômica. Se o cupom não estiver livre, desfaz a inscrição órfã.
+  // ── Cupom ────────────────────────────────────────────────────────────────
+  // O resgate vem primeiro: é ele que diz quanto desconto existe e é o ponto de
+  // corrida (dois pedidos disputando o último uso). Só um leva.
+  let discountPercent = 0;
   if (couponCode) {
-    let registrationId: string;
-    try {
-      const { rows } = await query<{ id: string }>(
-        `INSERT INTO registrations (full_name, email, phone, company, amount_cents, coupon_code)
-         VALUES ($1, $2, $3, $4, 0, $5) RETURNING id`,
-        [fullName, email, phone, company, couponCode],
-      );
-      registrationId = rows[0].id;
-    } catch (err) {
-      console.error("[register] insert (cortesia) falhou:", err);
-      return res.status(500).json({ error: "db" });
-    }
-
     const redeemed = await redeemCoupon(couponCode).catch((err) => {
       console.error("[register] resgate de cupom falhou:", err);
-      return false;
+      return null;
     });
-    if (!redeemed) {
-      // Cupom inexistente, inativo ou esgotado: remove a inscrição órfã e avisa.
-      await query(`DELETE FROM registrations WHERE id = $1`, [
-        registrationId,
-      ]).catch(() => {});
+    if (redeemed === null) {
       return res.status(400).json({
         error: "validation",
         fields: { coupon: "Cupom inválido ou esgotado." },
       });
     }
+    discountPercent = redeemed;
+  }
 
-    // Cupom válido: marca a inscrição como paga (cortesia). notified_paid = true
-    // porque nós mesmos enviamos a confirmação abaixo — o poller nunca varre
-    // cortesias (status 'paid', sem mp_preference_id).
+  const amountCents = discountedCents(config.ticket.priceCents, discountPercent);
+
+  let registrationId: string;
+  try {
+    const { rows } = await query<{ id: string }>(
+      `INSERT INTO registrations (full_name, email, phone, company, amount_cents, coupon_code)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+      [fullName, email, phone, company, amountCents, couponCode],
+    );
+    registrationId = rows[0].id;
+  } catch (err) {
+    console.error("[register] insert falhou:", err);
+    // Inscrição não gravada: o uso do cupom não pode ficar queimado.
+    if (couponCode) await releaseCoupon(couponCode).catch(() => {});
+    return res.status(500).json({ error: "db" });
+  }
+
+  // ── Caminho de cortesia (cupom de 100%) ──────────────────────────────────
+  // Não passa pelo Mercado Pago: a inscrição já sai paga.
+  if (amountCents === 0) {
+    // notified_paid = true porque nós mesmos enviamos a confirmação abaixo — o
+    // poller nunca varre cortesias (status 'paid', sem mp_preference_id).
     let reg: RegistrationRow;
     try {
       const { rows } = await query<RegistrationRow>(
@@ -133,22 +147,7 @@ registerRouter.post("/register", async (req, res) => {
     });
   }
 
-  // ── Caminho normal (pagamento pelo Mercado Pago) ─────────────────────────
-  const amountCents = config.ticket.priceCents;
-
-  let registrationId: string;
-  try {
-    const { rows } = await query<{ id: string }>(
-      `INSERT INTO registrations (full_name, email, phone, company, amount_cents)
-       VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-      [fullName, email, phone, company, amountCents],
-    );
-    registrationId = rows[0].id;
-  } catch (err) {
-    console.error("[register] insert falhou:", err);
-    return res.status(500).json({ error: "db" });
-  }
-
+  // ── Caminho normal (pagamento pelo Mercado Pago, com ou sem desconto) ────
   try {
     const pref = await createPreference({
       registrationId,

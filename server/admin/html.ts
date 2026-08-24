@@ -305,10 +305,15 @@ export function dashboardPage(data: DashboardData): string {
 const COUPON_FLASH: Record<string, { msg?: string; err?: string }> = {
   created: { msg: "Cupom criado." },
   exists: { err: "Já existe um cupom com esse código." },
-  invalid: { err: "Código ou nº de usos inválido." },
+  invalid: { err: "Código, desconto ou nº de usos inválido." },
   updated: { msg: "Cupom atualizado." },
   deleted: { msg: "Cupom excluído." },
 };
+
+/** Rótulo do desconto: 100% é a cortesia; o resto é só a porcentagem. */
+function discountLabel(percent: number): string {
+  return percent >= 100 ? "Cortesia (100%)" : `${percent}%`;
+}
 
 function couponRow(c: CouponRow): string {
   const pct = c.max_uses > 0 ? Math.min(100, Math.round((c.uses / c.max_uses) * 100)) : 0;
@@ -318,7 +323,7 @@ function couponRow(c: CouponRow): string {
   const toggleLabel = c.active ? "Desativar" : "Ativar";
   return `<tr>
     <td><a href="/admin/coupons/${encodeURIComponent(c.code)}"><strong>${esc(c.code)}</strong></a></td>
-    <td>Cortesia (100%)</td>
+    <td>${discountLabel(c.discount_percent)}</td>
     <td class="uses">${c.uses}/${c.max_uses}<div class="bar"><i style="width:${pct}%"></i></div></td>
     <td>${status}</td>
     <td>${c.note ? esc(c.note) : '<span class="muted">—</span>'}</td>
@@ -330,7 +335,10 @@ function couponRow(c: CouponRow): string {
   </tr>`;
 }
 
-/** Página de cupons: formulário de criação + tabela com uso e ações. */
+/**
+ * Página de cupons: formulário de criação + tabela com desconto, uso e ações.
+ * 100% é cortesia (dispensa o checkout); abaixo disso o cupom só abate o valor.
+ */
 export function couponsPage(
   coupons: CouponRow[],
   flashKey?: string,
@@ -343,10 +351,12 @@ export function couponsPage(
       : "";
 
   const form = `<div class="panel">
-    <h2>Novo cupom de cortesia</h2>
+    <h2>Novo cupom</h2>
     <form class="cform" method="post" action="/admin/coupons">
       <div class="fld"><label for="c-code">Código</label>
-        <input id="c-code" name="code" placeholder="NAVECON100" autocapitalize="characters" required></div>
+        <input id="c-code" name="code" placeholder="NAVECON15" autocapitalize="characters" required></div>
+      <div class="fld"><label for="c-pct">Desconto (%)</label>
+        <input id="c-pct" name="discount_percent" type="number" min="1" max="100" value="100" required style="width:110px"></div>
       <div class="fld"><label for="c-max">Usos</label>
         <input id="c-max" name="max_uses" type="number" min="1" max="100000" value="1" required style="width:90px"></div>
       <div class="fld" style="flex:1;min-width:180px"><label for="c-note">Nota (pra quem)</label>

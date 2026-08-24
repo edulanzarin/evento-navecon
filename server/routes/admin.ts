@@ -132,7 +132,7 @@ async function loadSummary(): Promise<Summary> {
        count(*)::int AS total,
        count(*) FILTER (WHERE status = 'paid')::int AS paid,
        count(*) FILTER (WHERE status IN ('pending','in_process'))::int AS pending,
-       count(*) FILTER (WHERE coupon_code IS NOT NULL)::int AS courtesy,
+       count(*) FILTER (WHERE payment_method = 'cortesia')::int AS courtesy,
        COALESCE(sum(paid_amount_cents) FILTER (WHERE status = 'paid'), 0)::int AS revenue_cents
      FROM registrations`,
   );
@@ -285,9 +285,12 @@ adminRouter.get("/coupons", async (req, res) => {
 adminRouter.post("/coupons", async (req, res) => {
   const code = String(req.body?.code ?? "");
   const maxUses = Number.parseInt(String(req.body?.max_uses ?? ""), 10);
+  // Sem porcentagem informada o cupom é cortesia (o comportamento de antes).
+  const raw = String(req.body?.discount_percent ?? "").trim();
+  const discountPercent = raw === "" ? 100 : Number.parseInt(raw, 10);
   const note = String(req.body?.note ?? "");
   try {
-    const result = await createCoupon(code, maxUses, note);
+    const result = await createCoupon(code, maxUses, discountPercent, note);
     res.redirect(`/admin/coupons?flash=${result === "ok" ? "created" : result}`);
   } catch (err) {
     console.error("[admin] criar cupom falhou:", err);

@@ -327,7 +327,7 @@ describe("RegistrationForm", () => {
     }
     function getCouponSubmitButton(): HTMLButtonElement {
       return screen.getByRole("button", {
-        name: /(Confirmar inscrição|Ir para o pagamento|Enviando|Redirecionando)/,
+        name: /(Continuar|Ir para o pagamento|Enviando|Redirecionando)/,
       }) as HTMLButtonElement;
     }
 

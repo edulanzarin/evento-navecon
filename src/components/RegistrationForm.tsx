@@ -289,10 +289,11 @@ export function RegistrationForm({
             />
           </div>
 
-          {/* Coupon — optional courtesy code. A valid 100% coupon skips payment;
-              the server validates it and returns a per-field message if invalid. */}
+          {/* Coupon — optional discount code. A 100% coupon skips payment; a
+              partial one just lowers the checkout amount. The server owns the
+              rule and returns a per-field message when the code is invalid. */}
           <div className="field">
-            <label htmlFor="reg-coupon">Cupom de cortesia (opcional)</label>
+            <label htmlFor="reg-coupon">Cupom de desconto (opcional)</label>
             <input
               id="reg-coupon"
               name="coupon"
@@ -319,7 +320,7 @@ export function RegistrationForm({
               : state === "redirecting"
                 ? "Redirecionando…"
                 : coupon.trim()
-                  ? "Confirmar inscrição"
+                  ? "Continuar"
                   : "Ir para o pagamento"}
           </button>
 
